@@ -59,7 +59,7 @@ public class Parser {
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.eventListeners = new ArrayList<>();
-        this.tokenAstNodeMap = new HashMap<>();
+        this.tokenAstNodeMap = new IdentityHashMap<>();
         this.astNodeRanges = new IdentityHashMap<>();
         this.astNodeStartPositions = new LinkedList<>();
     }
