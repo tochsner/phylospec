@@ -4,7 +4,101 @@ import java.util.List;
 
 public abstract class FormatToken {
 
-    public abstract void format(StringBuilder stringBuilder, int lw);
+    public abstract int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks);
+
+    public abstract int getBaseWidth();
+
+    public static class Nest extends FormatToken {
+        private FormatToken[] inner;
+        private int indentOnBreak = 4;
+
+        public Nest(FormatToken... inner) {
+            this.inner = inner;
+        }
+
+        public Nest(int indentOnBreak, List<FormatToken> inner) {
+            this(inner.toArray(new FormatToken[0]));
+            this.indentOnBreak = indentOnBreak;
+        }
+
+        public Nest(List<FormatToken> inner) {
+            this(inner.toArray(new FormatToken[0]));
+        }
+
+        public FormatToken[] getInner() {
+            return inner;
+        }
+
+        public void setInner(FormatToken... inner) {
+            this.inner = inner;
+        }
+
+        @Override
+        public int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks) {
+            int baseWidth = this.getBaseWidth();
+
+            boolean applyBreaksHere = maxWidth < widthBefore + baseWidth + widthAfter;
+            int oldIndent = indent;
+
+            int numLineBreaks = 0;
+            for (FormatToken token : this.inner) {
+                if (token.canBreak()) {
+                    numLineBreaks++;
+                }
+            }
+
+            if (applyBreaksHere && 0 < numLineBreaks) {
+                indent += this.indentOnBreak;
+            }
+
+            widthAfter += baseWidth;
+
+            int numBreaksAdded = 0;
+            for (FormatToken formatToken : this.inner) {
+                if (formatToken.canBreak()) numBreaksAdded++;
+
+                if (numBreaksAdded == numLineBreaks)
+                    indent = oldIndent;
+
+                widthAfter -= formatToken.getBaseWidth();
+
+                widthBefore = formatToken.format(
+                        stringBuilder,
+                        maxWidth,
+                        widthBefore,
+                        widthAfter,
+                        indent,
+                        applyBreaksHere
+                );
+            }
+
+            return widthBefore;
+        }
+
+        @Override
+        public int getBaseWidth() {
+            int currBaseWidth = 0;
+            int maxBaseWidth = 0;
+
+            for (FormatToken token : this.inner) {
+                currBaseWidth += token.getBaseWidth();
+
+                if (token instanceof MustBreak) {
+                    maxBaseWidth = Math.max(maxBaseWidth, currBaseWidth);
+                    currBaseWidth = 0;
+                }
+            }
+
+            return Math.max(maxBaseWidth, currBaseWidth);
+        }
+
+        @Override
+        protected boolean canBreak() {
+            return false;
+        }
+    }
+
+    protected abstract boolean canBreak();
 
     public static class Text extends FormatToken {
         private String text;
@@ -22,48 +116,19 @@ public abstract class FormatToken {
         }
 
         @Override
-        public void format(StringBuilder stringBuilder, int lw) {
+        public int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks) {
             stringBuilder.append(this.text);
+            return widthBefore + this.text.length();
         }
-    }
-
-    public static class Nest extends FormatToken {
-        private FormatToken[] inner;
-
-        public Nest(FormatToken inner) {
-            this.inner = new FormatToken[] {inner};
-        }
-
-        public Nest(FormatToken... inner) {
-            this.inner = inner;
-        }
-
-        public Nest(List<FormatToken> inner) {
-            this(inner.toArray(new FormatToken[0]));
-        }
-
-        public FormatToken[] getInner() {
-            return inner;
-        }
-
-        public void setInner(FormatToken... inner) {
-            this.inner = inner;
-        }
-
 
         @Override
-        public void format(StringBuilder stringBuilder, int lw) {
-            for (FormatToken formatToken : this.inner) {
-                formatToken.format(stringBuilder, lw);
-            }
+        public int getBaseWidth() {
+            return this.text.length();
         }
-    }
-
-    public static class MustBreak extends FormatToken {
 
         @Override
-        public void format(StringBuilder stringBuilder, int lw) {
-            stringBuilder.append("\n");
+        protected boolean canBreak() {
+            return false;
         }
     }
 
@@ -80,8 +145,51 @@ public abstract class FormatToken {
         }
 
         @Override
-        public void format(StringBuilder stringBuilder, int lw) {
-            stringBuilder.append(delimiter);
+        public int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks) {
+            if (applyBreaks) {
+                stringBuilder.append("\n");
+                for (int i = 0; i < indent; i++) {
+                    stringBuilder.append(" ");
+                }
+                return indent;
+            } else {
+                stringBuilder.append(delimiter);
+                return widthBefore + delimiter.length();
+            }
+        }
+
+        @Override
+        public int getBaseWidth() {
+            return this.delimiter.length();
+        }
+
+        @Override
+        protected boolean canBreak() {
+            return true;
+        }
+    }
+
+    public static class MustBreak extends FormatToken {
+
+        @Override
+        public int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks) {
+            stringBuilder.append("\n");
+
+            for (int i = 0; i < indent; i++) {
+                stringBuilder.append(" ");
+            }
+
+            return indent;
+        }
+
+        @Override
+        public int getBaseWidth() {
+            return 0;
+        }
+
+        @Override
+        protected boolean canBreak() {
+            return true;
         }
     }
 

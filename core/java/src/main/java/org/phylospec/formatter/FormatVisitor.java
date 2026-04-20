@@ -97,14 +97,16 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
     public FormatToken visitObservedBetweenStmt(Stmt.ObservedBetween observedBetween) {
         return new FormatToken.Nest(
                 observedBetween.stmt.accept(this),
-                new FormatToken.Text(" observed between ["),
-                new FormatToken.Break(),
-                observedBetween.observedFrom.accept(this),
-                new FormatToken.Text(", "),
-                new FormatToken.Break(),
-                observedBetween.observedTo.accept(this),
-                new FormatToken.Break(),
-                new FormatToken.Text("]")
+                new FormatToken.Nest(
+                    new FormatToken.Text(" observed between ["),
+                    new FormatToken.Break(),
+                    observedBetween.observedFrom.accept(this),
+                    new FormatToken.Text(", "),
+                    new FormatToken.Break(),
+                    observedBetween.observedTo.accept(this),
+                    new FormatToken.Break(),
+                    new FormatToken.Text("]")
+                )
         );
     }
 
@@ -171,8 +173,7 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
     public FormatToken visitBinary(Expr.Binary expr) {
         return new FormatToken.Nest(
                 expr.left.accept(this),
-                new FormatToken.Break(" "),
-                new FormatToken.Text(TokenType.getLexeme(expr.operator) + " "),
+                new FormatToken.Text(" " + TokenType.getLexeme(expr.operator) + " "),
                 expr.right.accept(this)
         );
     }
@@ -192,7 +193,7 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
                 argumentParts.add(new FormatToken.Break(" "));
             }
         }
-        argumentParts.add(new FormatToken.Nest(argumentParts));
+        parts.add(new FormatToken.Nest(0, argumentParts));
 
         parts.add(new FormatToken.Break());
         parts.add(new FormatToken.Text(")"));
@@ -228,9 +229,11 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
     public FormatToken visitGrouping(Expr.Grouping expr) {
         return new FormatToken.Nest(
                 new FormatToken.Text("("),
-                new FormatToken.Break(),
-                expr.expression.accept(this),
-                new FormatToken.Break(),
+                new FormatToken.Nest(
+                    new FormatToken.Break(),
+                    expr.expression.accept(this),
+                    new FormatToken.Break()
+                ),
                 new FormatToken.Text(")")
         );
     }
@@ -240,20 +243,24 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         List<FormatToken> parts = new ArrayList<>();
 
         parts.add(new FormatToken.Text("["));
-        parts.add(new FormatToken.Break());
 
         List<FormatToken> elementParts = new ArrayList<>();
-        for (int i = 0; i < expr.elements.size(); i++) {
-            elementParts.add(expr.elements.get(i).accept(this));
+        elementParts.add(new FormatToken.Break());
 
-            if (i < expr.elements.size()) {
-                elementParts.add(new FormatToken.Text(","));
-                elementParts.add(new FormatToken.Break(" "));
+        List<FormatToken> innerElementParts = new ArrayList<>();
+        for (int i = 0; i < expr.elements.size(); i++) {
+            innerElementParts.add(expr.elements.get(i).accept(this));
+
+            if (i < expr.elements.size() - 1) {
+                innerElementParts.add(new FormatToken.Text(","));
+                innerElementParts.add(new FormatToken.Break(" "));
             }
         }
-        parts.add(new FormatToken.Nest(elementParts));
+        elementParts.add(new FormatToken.Nest(0, innerElementParts));
 
-        parts.add(new FormatToken.Break());
+        elementParts.add(new FormatToken.Break());
+
+        parts.add(new FormatToken.Nest(elementParts));
         parts.add(new FormatToken.Text("]"));
 
         return new FormatToken.Nest(parts);

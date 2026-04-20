@@ -47,6 +47,7 @@ public class Lsp implements org.eclipse.lsp4j.services.LanguageServer {
         res.getCapabilities().setCompletionProvider(new CompletionOptions());
         res.getCapabilities().setHoverProvider(Boolean.TRUE);
         res.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
+        res.getCapabilities().setDocumentFormattingProvider(true);
         res.getCapabilities().setDiagnosticProvider(
                 new DiagnosticRegistrationOptions(false, false)
         );

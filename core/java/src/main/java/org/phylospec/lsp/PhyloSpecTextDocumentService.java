@@ -74,4 +74,12 @@ public class PhyloSpecTextDocumentService implements TextDocumentService {
             document.setRemoteProxy(remoteProxy);
         }
     }
+
+    @Override
+    public CompletableFuture<List<? extends TextEdit>> formatting(DocumentFormattingParams params) {
+        LspDocument lspDocument = this.documents.get(params.getTextDocument().getUri());
+        TextEdit formatted = lspDocument.format();
+
+        return CompletableFuture.completedFuture(List.of(formatted));
+    }
 }

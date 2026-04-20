@@ -11,8 +11,10 @@ public class Test {
 
     static void main() {
         String text = """
-                Real x = ("Hallo" + a - 100.5)
-                """;
+                Alignment filtered = subset(
+                    alignment=data, start=10, end=898
+                )
+              """;
 
         // run lexer
 

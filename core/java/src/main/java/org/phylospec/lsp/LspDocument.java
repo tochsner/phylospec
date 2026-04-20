@@ -16,6 +16,7 @@ import org.phylospec.typeresolver.TypeResolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
 
@@ -308,5 +309,19 @@ class LspDocument implements ErrorEventListener {
 
     public void setRemoteProxy(LanguageClient remoteProxy) {
         this.client = remoteProxy;
+    }
+
+    public TextEdit format() {
+        org.phylospec.formatter.Formatter formatter = new org.phylospec.formatter.Formatter();
+        String formatted = formatter.format(this.statements);
+
+        String[] lines = content.split("\n", -1);
+        int lastLine = lines.length - 1;
+        int lastChar = lines[lastLine].length();
+
+        return new TextEdit(
+                new org.eclipse.lsp4j.Range(new Position(0, 0), new Position(lastLine, lastChar)),
+                formatted
+        );
     }
 }

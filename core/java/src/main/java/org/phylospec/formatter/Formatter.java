@@ -12,7 +12,7 @@ public class Formatter {
         StringBuilder formattedString = new StringBuilder();
         for (Stmt stmt : statements) {
             FormatToken formatToken = stmt.accept(formatVisitor);
-            formatToken.format(formattedString, 20);
+            formatToken.format(formattedString, 35, 0, 0, 0, false);
             formattedString.append("\n");
         }
 
