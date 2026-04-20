@@ -125,6 +125,7 @@ public class Parser {
      * Reads the source code provided in the constructor and returns a list
      * of tokens.
      * Unlike {@code parse()}, this also parses incomplete expressions if no full statements are detected.
+     *
      * @return list of scanned tokens.
      */
     public List<AstNode> parseStmtOrExpr() {
@@ -831,9 +832,14 @@ public class Parser {
         if (isAtEnd()) return previous();
 
         if (skipNewLines) {
-            while (tokens.get(current).type == TokenType.EOL && current + 1 < this.tokens.size()) {
+            while ((tokens.get(current).type == TokenType.EOL || tokens.get(current).type == TokenType.COMMENT)
+                    && current + 1 < this.tokens.size()) {
                 current++;
             }
+        }
+
+        while (tokens.get(current).type == TokenType.COMMENT && current + 1 < this.tokens.size()) {
+            current++;
         }
 
         current++;
@@ -876,30 +882,40 @@ public class Parser {
      * Returns the current character without advancing the cursor.
      */
     private Token peek() {
+        int currentToPeek = current;
+
         if (skipNewLines) {
-            int currentToPeek = current;
-            while (tokens.get(currentToPeek).type == TokenType.EOL && currentToPeek + 1 < tokens.size()) {
+            while ((tokens.get(currentToPeek).type == TokenType.EOL || tokens.get(currentToPeek).type == TokenType.COMMENT)
+                            && currentToPeek + 1 < tokens.size()) {
                 currentToPeek++;
             }
-            return tokens.get(currentToPeek);
         }
 
-        return tokens.get(current);
+        while (tokens.get(currentToPeek).type == TokenType.COMMENT && currentToPeek + 1 < tokens.size()) {
+            currentToPeek++;
+        }
+
+        return tokens.get(currentToPeek);
     }
 
     /**
      * Returns the last character without changing the cursor.
      */
     private Token previous() {
+        int currentToPeek = current - 1;
+
         if (skipNewLines) {
-            int currentToPeek = current - 1;
-            while (tokens.get(currentToPeek).type == TokenType.EOL && 0 < currentToPeek) {
+            while ((tokens.get(currentToPeek).type == TokenType.EOL || tokens.get(currentToPeek).type == TokenType.COMMENT)
+                    && 0 < currentToPeek) {
                 currentToPeek--;
             }
-            return tokens.get(currentToPeek);
         }
 
-        return tokens.get(current - 1);
+        while (tokens.get(currentToPeek).type == TokenType.COMMENT && 0 < currentToPeek) {
+            currentToPeek--;
+        }
+
+        return tokens.get(currentToPeek);
     }
 
     /**

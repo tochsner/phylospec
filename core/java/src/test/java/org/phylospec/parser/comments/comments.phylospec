@@ -10,7 +10,20 @@
 // Other stuff: ឃᢆ᯽₪ℜ↩⊗┺░
 // Emoji: ☃☺♣
 
+Real x = 10 // end-of-line comment is fine
+
+Vector<Real> y = [
+    // in-array comment
+    10.0,
+    exp(
+        // in-function comment
+        x=10
+    )
+]
+
 // EXPECT AST
+// (AS Real x 10)
+// (AS Vector<Real> y (AR 10.0 (CA exp (AA x 10))))
 // EXPECT AST
 
 // EXPECT TYPE_ERRORS
