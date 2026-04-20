@@ -832,16 +832,10 @@ public class Parser {
         if (isAtEnd()) return previous();
 
         if (skipNewLines) {
-            while ((tokens.get(current).type == TokenType.EOL || tokens.get(current).type == TokenType.COMMENT)
-                    && current + 1 < this.tokens.size()) {
+            while (tokens.get(current).type == TokenType.EOL && current + 1 < this.tokens.size()) {
                 current++;
             }
         }
-
-        while (tokens.get(current).type == TokenType.COMMENT && current + 1 < this.tokens.size()) {
-            current++;
-        }
-
         current++;
 
         return previous();
@@ -885,14 +879,9 @@ public class Parser {
         int currentToPeek = current;
 
         if (skipNewLines) {
-            while ((tokens.get(currentToPeek).type == TokenType.EOL || tokens.get(currentToPeek).type == TokenType.COMMENT)
-                            && currentToPeek + 1 < tokens.size()) {
+            while (tokens.get(currentToPeek).type == TokenType.EOL && currentToPeek + 1 < tokens.size()) {
                 currentToPeek++;
             }
-        }
-
-        while (tokens.get(currentToPeek).type == TokenType.COMMENT && currentToPeek + 1 < tokens.size()) {
-            currentToPeek++;
         }
 
         return tokens.get(currentToPeek);
@@ -905,14 +894,9 @@ public class Parser {
         int currentToPeek = current - 1;
 
         if (skipNewLines) {
-            while ((tokens.get(currentToPeek).type == TokenType.EOL || tokens.get(currentToPeek).type == TokenType.COMMENT)
-                    && 0 < currentToPeek) {
+            while (tokens.get(currentToPeek).type == TokenType.EOL && 0 < currentToPeek) {
                 currentToPeek--;
             }
-        }
-
-        while (tokens.get(currentToPeek).type == TokenType.COMMENT && 0 < currentToPeek) {
-            currentToPeek--;
         }
 
         return tokens.get(currentToPeek);
@@ -967,6 +951,8 @@ public class Parser {
      * given parsed {@link AstNode}.
      */
     private <T extends AstNode> T remember(T newAstNode) {
+        // remember range of the ast node
+
         int lastPosition = astNodeStartPositions.pop();
 
         Range startRange = tokens.get(lastPosition).range;

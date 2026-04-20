@@ -11,9 +11,11 @@ public class Test {
 
     static void main() {
         String text = """
+                // per-statement
                 Alignment filtered = subset(
-                    alignment=data, start=10, end=898
-                )
+                    // per-func
+                    alignment=data, start=10, end=898  // end-of-line-2
+                ) // end-of-line-3
               """;
 
         // run lexer

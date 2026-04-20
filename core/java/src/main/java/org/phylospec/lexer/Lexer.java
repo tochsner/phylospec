@@ -28,6 +28,7 @@ public class Lexer {
     private final String source;
 
     private final List<Token> tokens = new ArrayList<>();
+    private final List<Token> comments = new ArrayList<>();
 
     private int start = 0;
     private int current = 0;
@@ -357,7 +358,7 @@ public class Lexer {
     private void comment() {
         // this is a comment, it goes until the end of the line
         while (peek() != '\n' && !isAtEnd()) advance();
-        addToken(TokenType.COMMENT, source.substring(start + 2, current));
+        addCommentToken(TokenType.COMMENT, source.substring(start + 2, current));
     }
 
     /* general helper methods */
@@ -451,6 +452,15 @@ public class Lexer {
         String text = source.substring(start, current);
         Range range = new Range(startLine, currentLine, start - startLineStart, current - currentLineStart);
         tokens.add(new Token(type, text, literal, range));
+    }
+
+    /**
+     * Adds a new comment token with a corresponding literal.
+     */
+    private void addCommentToken(TokenType type, Object literal) {
+        String text = source.substring(start, current);
+        Range range = new Range(startLine, currentLine, start - startLineStart, current - currentLineStart);
+        comments.add(new Token(type, text, literal, range));
     }
 
     /**
