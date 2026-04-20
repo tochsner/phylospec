@@ -955,6 +955,11 @@ public class Parser {
 
         int lastPosition = astNodeStartPositions.pop();
 
+        // trim comments and EOL at the start
+        while (tokens.get(lastPosition).type == TokenType.COMMENT || tokens.get(lastPosition).type == TokenType.EOL) {
+            lastPosition++;
+        }
+
         Range startRange = tokens.get(lastPosition).range;
 
         for (int i = lastPosition; i < current; i++) {
@@ -962,7 +967,15 @@ public class Parser {
             tokenAstNodeMap.putIfAbsent(token, newAstNode);
         }
 
-        Range endRange = tokens.get(current - 1).range;
+        int endToken = current - 1;
+
+        // trim comments and EOL at the end
+        while (tokens.get(endToken).type == TokenType.COMMENT || tokens.get(endToken).type == TokenType.EOL) {
+            endToken--;
+        }
+
+        Range endRange = tokens.get(endToken).range;
+
         Range astNodeRange = Range.combine(startRange, endRange);
         astNodeRanges.put(newAstNode, astNodeRange);
 
