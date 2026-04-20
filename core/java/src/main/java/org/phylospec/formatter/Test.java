@@ -11,11 +11,10 @@ public class Test {
 
     static void main() {
         String text = """
-                // per-statement
-                Alignment filtered = subset(
-                    // per-func
-                    alignment=data, start=10, end=898  // end-of-line-2
-                ) // end-of-line-3
+                QMatrix qMatrix = hky(
+                                kappa~LogNormal(mean=1, logSd=1.0),
+                                baseFrequencies=[0.25, 0.25, 0.25, 0.25]
+                            )
               """;
 
         // run lexer
@@ -30,7 +29,7 @@ public class Test {
 
         Formatter formatter = new Formatter();
 
-        System.out.println(formatter.format(statements));
+        System.out.println(formatter.format(statements, lexer, parser));
     }
 
 }

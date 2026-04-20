@@ -51,22 +51,26 @@ public abstract class FormatToken {
                 indent += this.indentOnBreak;
             }
 
-            widthAfter += baseWidth;
-
             int numBreaksAdded = 0;
-            for (FormatToken formatToken : this.inner) {
+            for (int i = 0; i < this.inner.length; i++) {
+                FormatToken formatToken = this.inner[i];
+
                 if (formatToken.canBreak()) numBreaksAdded++;
 
                 if (numBreaksAdded == numLineBreaks)
                     indent = oldIndent;
 
-                widthAfter -= formatToken.getBaseWidth();
+                int widthUntilBreak = 0;
+                for (int j = i + 1; j < this.inner.length; j++) {
+                    if (this.inner[j].canBreak()) break;
+                    widthUntilBreak += this.inner[j].getBaseWidth();
+                }
 
                 widthBefore = formatToken.format(
                         stringBuilder,
                         maxWidth,
                         widthBefore,
-                        widthAfter,
+                        widthAfter + widthUntilBreak,
                         indent,
                         applyBreaksHere
                 );

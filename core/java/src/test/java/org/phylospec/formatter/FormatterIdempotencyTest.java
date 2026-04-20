@@ -62,6 +62,6 @@ public class FormatterIdempotencyTest {
         List<Token> tokens = lexer.scanTokens();
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
-        return new Formatter().format(statements);
+        return new Formatter().format(statements, lexer, parser);
     }
 }

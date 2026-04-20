@@ -33,6 +33,7 @@ class LspDocument implements ErrorEventListener {
 
     private String content;
     private List<Token> tokens;
+    private Lexer lexer;
     private Parser parser;
     private List<Stmt> statements;
     TypeResolver typeResolver;
@@ -65,7 +66,7 @@ class LspDocument implements ErrorEventListener {
 
         // run lexer
 
-        Lexer lexer = new Lexer(newContent);
+        lexer = new Lexer(newContent);
         lexer.registerEventListener(this);
         tokens = lexer.scanTokens();
 
@@ -313,7 +314,7 @@ class LspDocument implements ErrorEventListener {
 
     public TextEdit format() {
         org.phylospec.formatter.Formatter formatter = new org.phylospec.formatter.Formatter();
-        String formatted = formatter.format(this.statements);
+        String formatted = formatter.format(this.statements, lexer, parser);
 
         String[] lines = content.split("\n", -1);
         int lastLine = lines.length - 1;

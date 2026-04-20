@@ -73,6 +73,13 @@ public class Lexer {
         return tokens;
     }
 
+    /**
+     * Returns the tokens corresponding to comments.
+     */
+    public List<Token> getComments() {
+        return comments;
+    }
+
     private void scanToken() {
         start = current;
         startLine = currentLine;
