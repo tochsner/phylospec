@@ -11,39 +11,12 @@ public class Test {
 
     static void main() {
         String text = """
+                 data {
                  QMatrix f = hky(
                     kappa~LogNormal(mean=1, logSd=1.0),
                     baseFrequencies=[0.25, 0.25, 0.25, 0.25]
                 )
-                data {
-                QMatrix a = hky(
-                    kappa~LogNormal(mean=1, logSd=1.0),
-                    baseFrequencies=[0.25, 0.25, 0.25, 0.25]
-                )
-                
-                
-                
-                
-                QMatrix b = hky(
-                    kappa~LogNormal(mean=1, logSd=1.0),
-                    baseFrequencies=[0.25, 0.25, 0.25, 0.25]
-                )
                 }
-                
-                model {
-              
-                
-                QMatrix c = hky(
-                    kappa~LogNormal(mean=1, logSd=1.0),
-                    baseFrequencies=[0.25, 0.25, 0.25, 0.25]
-                )
-                }
-                
-                
-                  QMatrix d = hky(
-                    kappa~LogNormal(mean=1, logSd=1.0),
-                    baseFrequencies=[0.25, 0.25, 0.25, 0.25]
-                )
               """;
 
         // run lexer

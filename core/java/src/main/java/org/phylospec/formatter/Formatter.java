@@ -53,24 +53,32 @@ public class Formatter {
 
             // add block header if needed
 
+            if (stmts != stmtsPerBlock.getFirst()) {
+                if (currentBlock instanceof Stmt.Block.NoBlock) {
+                    formattedString.append("\n");
+                } else {
+                    formattedString.append("\n\n");
+                }
+            }
+
             switch (currentBlock) {
                 case Stmt.Block.NoBlock none: {
                     break;
                 }
                 case Stmt.Block.Data data: {
-                    formattedString.append("\n\ndata {");
+                    formattedString.append("data {");
                     break;
                 }
                 case Stmt.Block.Model model: {
-                    formattedString.append("\n\nmodel {");
+                    formattedString.append("model {");
                     break;
                 }
                 case Stmt.Block.Mcmc mcmc: {
-                    formattedString.append("\n\nmcmc {");
+                    formattedString.append("mcmc {");
                     break;
                 }
                 case Stmt.Block.Custom custom: {
-                    formattedString.append("\n\n").append(custom.blockName()).append(" {");
+                    formattedString.append("").append(custom.blockName()).append(" {");
                     break;
                 }
             }
@@ -89,7 +97,7 @@ public class Formatter {
             }
 
             if (!(currentBlock instanceof Stmt.Block.NoBlock)) {
-                formattedString.append("\n}\n");
+                formattedString.append("\n}");
             }
         }
 
