@@ -10,11 +10,11 @@ import java.util.*;
 public class Formatter {
 
     int MAX_WIDTH = 55;
-    int MAX_LINE_GAP = 2;
+    int MAX_LINE_GAP = 3; // 3 newlines equal 2 actually empty lines
     int INDENT = 4;
 
     public String format(List<Stmt> statements, Lexer lexer, Parser parser) {
-        FormatVisitor formatVisitor = new FormatVisitor();
+        FormatVisitor formatVisitor = new FormatVisitor(lexer.getComments(), parser);
         StringBuilder formattedString = new StringBuilder();
 
         if (statements.isEmpty()) return "";

@@ -11,12 +11,19 @@ public class Test {
 
     static void main() {
         String text = """
-                 data {
-                 QMatrix f = hky(
-                    kappa~LogNormal(mean=1, logSd=1.0),
-                    baseFrequencies=[0.25, 0.25, 0.25, 0.25]
-                )
-                }
+                 // this is a line comment
+                 
+                 
+                 
+                 // this is another line comment
+                 Real x = 10
+                 
+                 // this is a third line comment
+                 // this is a third line comment
+                 
+                 
+                 
+                 Real y = 10 // this is an end-of-line comment
               """;
 
         // run lexer

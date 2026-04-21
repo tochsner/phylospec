@@ -1,40 +1,57 @@
 package org.phylospec.formatter;
 
-import org.phylospec.ast.AstType;
-import org.phylospec.ast.AstVisitor;
-import org.phylospec.ast.Expr;
-import org.phylospec.ast.Stmt;
+import org.phylospec.ast.*;
+import org.phylospec.lexer.Token;
 import org.phylospec.lexer.TokenType;
+import org.phylospec.parser.Parser;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, FormatToken> {
+    private final LinkedList<Token> comments;
+    private final Parser parser;
+
+    public FormatVisitor(List<Token> comments, Parser parser) {
+        this.comments = new LinkedList<>(comments);
+        this.parser = parser;
+    }
+
     @Override
     public FormatToken visitDecoratedStmt(Stmt.Decorated stmt) {
-        return new FormatToken.Nest(
-                new FormatToken.Text("@"),
-                stmt.decorator.accept(this),
-                new FormatToken.MustBreak(),
-                stmt.statement.accept(this)
+        return this.addLineComments(
+                stmt,
+                new FormatToken.Nest(
+                    new FormatToken.Text("@"),
+                    stmt.decorator.accept(this),
+                    new FormatToken.MustBreak(),
+                    stmt.statement.accept(this)
+                )
         );
     }
 
     @Override
     public FormatToken visitAssignment(Stmt.Assignment stmt) {
-        return new FormatToken.Nest(
-                stmt.type.accept(this),
-                new FormatToken.Text(" " + stmt.name + " = "),
-                stmt.expression.accept(this)
+        return this.addLineComments(
+                stmt,
+                new FormatToken.Nest(
+                    stmt.type.accept(this),
+                    new FormatToken.Text(" " + stmt.name + " = "),
+                    stmt.expression.accept(this)
+                )
         );
     }
 
     @Override
     public FormatToken visitDraw(Stmt.Draw stmt) {
-        return new FormatToken.Nest(
-                stmt.type.accept(this),
-                new FormatToken.Text(" " + stmt.name + " ~ "),
-                stmt.expression.accept(this)
+        return this.addLineComments(
+                stmt,
+                new FormatToken.Nest(
+                    stmt.type.accept(this),
+                    new FormatToken.Text(" " + stmt.name + " ~ "),
+                    stmt.expression.accept(this)
+                )
         );
     }
 
@@ -317,5 +334,44 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         parts.add(new FormatToken.Text(">"));
 
         return new FormatToken.Nest(parts);
+    }
+
+    /**
+     * Finds the line comments before that line and adds them to the beginning of the nested DOM expression.
+     */
+    private FormatToken addLineComments(Stmt node, FormatToken.Nest nest) {
+        List<FormatToken> commentLines = new ArrayList<>();
+
+        int nodeStartLine = this.parser.getRangeForAstNode(node).startLine;
+        int lastCommentLine = -1;
+        while (!this.comments.isEmpty() && this.comments.peekFirst().range.startLine < nodeStartLine) {
+            // because we are processing the comments and statements from top to bottom, all comments
+            // before the statement are line comments (we would have processed them otherwise)
+
+            Token comment = this.comments.pollFirst();
+
+            if (lastCommentLine != -1 && 1 < comment.range.startLine - lastCommentLine) {
+                // add a gap between comments
+                commentLines.add(new FormatToken.MustBreak());
+            }
+
+            commentLines.add(new FormatToken.Text(comment.lexeme));
+            commentLines.add(new FormatToken.MustBreak());
+
+            lastCommentLine = comment.range.startLine;
+        }
+
+        if (commentLines.isEmpty()) {
+            return nest;
+        }
+
+        // add a line break between the comment and the statement if needed
+        if (1 < nodeStartLine - lastCommentLine) {
+            // add a gap between comments
+            commentLines.add(new FormatToken.MustBreak());
+        }
+
+        commentLines.add(nest);
+        return new FormatToken.Nest(0, commentLines);
     }
 }
