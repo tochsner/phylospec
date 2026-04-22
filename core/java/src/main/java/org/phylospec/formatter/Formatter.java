@@ -14,7 +14,7 @@ public class Formatter {
     int INDENT = 4;
 
     public String format(List<Stmt> statements, Lexer lexer, Parser parser) {
-        FormatVisitor formatVisitor = new FormatVisitor(lexer.getComments(), parser);
+        FormatVisitor formatVisitor = new FormatVisitor(lexer.getTrivia(), parser);
         StringBuilder formattedString = new StringBuilder();
 
         if (statements.isEmpty()) return "";

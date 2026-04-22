@@ -1,70 +1,80 @@
 package org.phylospec.formatter;
 
 import org.phylospec.ast.*;
-import org.phylospec.lexer.Token;
+import org.phylospec.lexer.Range;
 import org.phylospec.lexer.TokenType;
 import org.phylospec.parser.Parser;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, FormatToken> {
-    private final LinkedList<Token> comments;
+    private final LinkedList<Trivia> trivia;
     private final Parser parser;
 
-    public FormatVisitor(List<Token> comments, Parser parser) {
-        this.comments = new LinkedList<>(comments);
+    public FormatVisitor(List<Trivia> trivia, Parser parser) {
+        this.trivia = new LinkedList<>(trivia);
         this.parser = parser;
     }
 
     @Override
     public FormatToken visitDecoratedStmt(Stmt.Decorated stmt) {
-        return this.addLineComments(
-                stmt,
-                new FormatToken.Nest(
-                    new FormatToken.Text("@"),
-                    stmt.decorator.accept(this),
-                    new FormatToken.MustBreak(),
-                    stmt.statement.accept(this)
-                )
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(stmt);
+
+        FormatToken formatToken = new FormatToken.Nest(
+                new FormatToken.Text("@"),
+                stmt.decorator.accept(this),
+                new FormatToken.MustBreak(),
+                stmt.statement.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitAssignment(Stmt.Assignment stmt) {
-        return this.addLineComments(
-                stmt,
-                new FormatToken.Nest(
-                    stmt.type.accept(this),
-                    new FormatToken.Text(" " + stmt.name + " = "),
-                    stmt.expression.accept(this)
-                )
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(stmt);
+
+        FormatToken formatToken = new FormatToken.Nest(
+                stmt.type.accept(this),
+                new FormatToken.Text(" " + stmt.name + " = "),
+                stmt.expression.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitDraw(Stmt.Draw stmt) {
-        return this.addLineComments(
-                stmt,
-                new FormatToken.Nest(
-                    stmt.type.accept(this),
-                    new FormatToken.Text(" " + stmt.name + " ~ "),
-                    stmt.expression.accept(this)
-                )
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(stmt);
+
+        FormatToken formatToken = new FormatToken.Nest(
+                stmt.type.accept(this),
+                new FormatToken.Text(" " + stmt.name + " ~ "),
+                stmt.expression.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitImport(Stmt.Import stmt) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(stmt);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 new FormatToken.Text("use "),
                 new FormatToken.Text(String.join(".", stmt.namespace))
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitIndexedStmt(Stmt.Indexed indexed) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(indexed);
+
         List<FormatToken> parts = new ArrayList<>();
 
         if (indexed.statement instanceof Stmt.Assignment assignment) {
@@ -98,21 +108,29 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
             parts.add(indexed.ranges.get(i).accept(this));
         }
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitObservedAsStmt(Stmt.ObservedAs observedAs) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(observedAs);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 observedAs.stmt.accept(this),
                 new FormatToken.Text(" observed as "),
                 observedAs.observedAs.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitObservedBetweenStmt(Stmt.ObservedBetween observedBetween) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(observedBetween);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 observedBetween.stmt.accept(this),
                 new FormatToken.Nest(
                     new FormatToken.Text(" observed between ["),
@@ -125,25 +143,33 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
                     new FormatToken.Text("]")
                 )
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitLiteral(Expr.Literal expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken;
         if (expr.value instanceof String string) {
-            return new FormatToken.Text("\"" + string + "\"");
-        }
-        if (expr.unit == null) {
-            return new FormatToken.Text(expr.value.toString());
+            formatToken = new FormatToken.Nest(new FormatToken.Text("\"" + string + "\""));
+        } else if (expr.unit == null) {
+            formatToken = new FormatToken.Nest(new FormatToken.Text(expr.value.toString()));
         } else {
-            return new FormatToken.Nest(
+            formatToken = new FormatToken.Nest(
                     new FormatToken.Text(expr.value.toString()),
                     new FormatToken.Text(expr.unit.toString())
             );
         }
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitStringTemplate(Expr.StringTemplate expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
         List<FormatToken> parts = new ArrayList<>();
 
         parts.add(new FormatToken.Text("\""));
@@ -160,43 +186,67 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
 
         parts.add(new FormatToken.Text("\""));
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitVariable(Expr.Variable expr) {
-        return new FormatToken.Text(expr.variableName);
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(new FormatToken.Text(expr.variableName));
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitTemplateVariable(Expr.TemplateVariable expr) {
-        return new FormatToken.Text(expr.variableName);
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(new FormatToken.Text(expr.variableName));
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitOptionalTemplateVariable(Expr.OptionalTemplateVariable expr) {
-        return new FormatToken.Text(expr.variableName);
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(new FormatToken.Text(expr.variableName));
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitUnary(Expr.Unary expr) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 new FormatToken.Text(TokenType.getLexeme(expr.operator)),
                 expr.right.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitBinary(Expr.Binary expr) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 expr.left.accept(this),
                 new FormatToken.Text(" " + TokenType.getLexeme(expr.operator) + " "),
                 expr.right.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitCall(Expr.Call expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
         List<FormatToken> parts = new ArrayList<>();
         parts.add(new FormatToken.Text(expr.functionName + "("));
         parts.add(new FormatToken.Break());
@@ -215,36 +265,49 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         parts.add(new FormatToken.Break());
         parts.add(new FormatToken.Text(")"));
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitAssignedArgument(Expr.AssignedArgument expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken;
         if (expr.name == null) {
-            return expr.expression.accept(this);
+            formatToken = new FormatToken.Nest(expr.expression.accept(this));
+        } else if (expr.expression instanceof Expr.Variable variable && expr.name.equals(variable.variableName)) {
+            formatToken = new FormatToken.Nest(expr.expression.accept(this));
+        } else {
+            formatToken = new FormatToken.Nest(
+                    new FormatToken.Text(expr.name),
+                    new FormatToken.Text("="),
+                    expr.expression.accept(this)
+            );
         }
-        if (expr.expression instanceof Expr.Variable var && expr.name.equals(var.variableName)) {
-            return expr.expression.accept(this);
-        }
-        return new FormatToken.Nest(
-                new FormatToken.Text(expr.name),
-                new FormatToken.Text("="),
-                expr.expression.accept(this)
-        );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitDrawnArgument(Expr.DrawnArgument expr) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 new FormatToken.Text(expr.name),
                 new FormatToken.Text("~"),
                 expr.expression.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitGrouping(Expr.Grouping expr) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 new FormatToken.Text("("),
                 new FormatToken.Nest(
                     new FormatToken.Break(),
@@ -253,10 +316,14 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
                 ),
                 new FormatToken.Text(")")
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitArray(Expr.Array expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
         List<FormatToken> parts = new ArrayList<>();
 
         parts.add(new FormatToken.Text("["));
@@ -280,11 +347,15 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         parts.add(new FormatToken.Nest(elementParts));
         parts.add(new FormatToken.Text("]"));
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitIndex(Expr.Index expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
         List<FormatToken> parts = new ArrayList<>();
 
         parts.add(expr.object.accept(this));
@@ -302,25 +373,37 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         }
         parts.add(new FormatToken.Text("]"));
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitRange(Expr.Range range) {
-        return new FormatToken.Nest(
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(range);
+
+        FormatToken formatToken = new FormatToken.Nest(
                 range.from.accept(this),
                 new FormatToken.Text(":"),
                 range.to.accept(this)
         );
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitAtomicType(AstType.Atomic expr) {
-        return new FormatToken.Text(expr.name);
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
+        FormatToken formatToken = new FormatToken.Nest(new FormatToken.Text(expr.name));
+
+        return attachTrivia.apply(formatToken);
     }
 
     @Override
     public FormatToken visitGenericType(AstType.Generic expr) {
+        UnaryOperator<FormatToken> attachTrivia = this.beginTrivia(expr);
+
         List<FormatToken> parts = new ArrayList<>();
         parts.add(new FormatToken.Text(expr.name + "<"));
         for (int i = 0; i < expr.typeParameters.length; i++) {
@@ -333,45 +416,63 @@ public class FormatVisitor implements AstVisitor<FormatToken, FormatToken, Forma
         }
         parts.add(new FormatToken.Text(">"));
 
-        return new FormatToken.Nest(parts);
+        FormatToken formatToken = new FormatToken.Nest(parts);
+
+        return attachTrivia.apply(formatToken);
     }
 
     /**
-     * Finds the line comments before that line and adds them to the beginning of the nested DOM expression.
+     * Collects any line comments preceding this node and returns a callback that prepends them to the finished token.
+     * Call at the top of a visitor (pre-order), then apply the result to the token built by that visitor.
      */
-    private FormatToken addLineComments(Stmt node, FormatToken.Nest nest) {
-        List<FormatToken> commentLines = new ArrayList<>();
+    private UnaryOperator<FormatToken> beginTrivia(AstNode node) {
+        Range nodeRange = this.parser.getRangeForAstNode(node);
+        if (nodeRange == null) return t -> t;
 
-        int nodeStartLine = this.parser.getRangeForAstNode(node).startLine;
-        int lastCommentLine = -1;
-        while (!this.comments.isEmpty() && this.comments.peekFirst().range.startLine < nodeStartLine) {
-            // because we are processing the comments and statements from top to bottom, all comments
-            // before the statement are line comments (we would have processed them otherwise)
+        List<FormatToken> precedingTriviaTokens = new ArrayList<>();
+        List<FormatToken> followingTriviaTokens = new ArrayList<>();
 
-            Token comment = this.comments.pollFirst();
+        while (!this.trivia.isEmpty()) {
+            Trivia nextTrivia = this.trivia.peekFirst();
+            if (isBefore(nextTrivia, nodeRange)) {
+                this.trivia.pollFirst();
+                if (nextTrivia instanceof Trivia.BlankLine) {
+                    continue;
+                }
 
-            if (lastCommentLine != -1 && 1 < comment.range.startLine - lastCommentLine) {
-                // add a gap between comments
-                commentLines.add(new FormatToken.MustBreak());
+                precedingTriviaTokens.add(nextTrivia.getFormatToken());
+                precedingTriviaTokens.add(new FormatToken.MustBreak());
+
+            } else if (isEOL(nextTrivia, nodeRange)) {
+                this.trivia.pollFirst();
+                if (nextTrivia instanceof Trivia.BlankLine) {
+                    continue;
+                }
+
+                followingTriviaTokens.add(new FormatToken.Text("\t"));
+                followingTriviaTokens.add(nextTrivia.getFormatToken());
+            } else {
+                break;
             }
-
-            commentLines.add(new FormatToken.Text(comment.lexeme));
-            commentLines.add(new FormatToken.MustBreak());
-
-            lastCommentLine = comment.range.startLine;
         }
 
-        if (commentLines.isEmpty()) {
-            return nest;
-        }
+        if (precedingTriviaTokens.isEmpty()) return t -> t;
 
-        // add a line break between the comment and the statement if needed
-        if (1 < nodeStartLine - lastCommentLine) {
-            // add a gap between comments
-            commentLines.add(new FormatToken.MustBreak());
-        }
+        return token -> {
+            List<FormatToken> result = new ArrayList<>(precedingTriviaTokens);
+            result.add(token);
+            result.addAll(followingTriviaTokens);
 
-        commentLines.add(nest);
-        return new FormatToken.Nest(0, commentLines);
+            return new FormatToken.Nest(0, result);
+        };
     }
+
+    private boolean isBefore(Trivia trivia, Range astNodeRange) {
+        return trivia.getRange().endLine < astNodeRange.startLine || trivia.getRange().endLine == astNodeRange.startLine && trivia.getRange().end < astNodeRange.start;
+    }
+
+    private boolean isEOL(Trivia trivia, Range astNodeRange) {
+        return trivia.getRange().startLine == astNodeRange.endLine && astNodeRange.end < trivia.getRange().start;
+    }
+
 }

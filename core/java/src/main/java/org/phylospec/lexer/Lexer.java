@@ -1,8 +1,8 @@
 package org.phylospec.lexer;
 
-import org.phylospec.ast.Expr;
 import org.phylospec.errors.Error;
 import org.phylospec.errors.ErrorEventListener;
+import org.phylospec.formatter.Trivia;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class Lexer {
     private final String source;
 
     private final List<Token> tokens = new ArrayList<>();
-    private final List<Token> comments = new ArrayList<>();
+    private final List<Trivia> trivia = new ArrayList<>();
 
     private int start = 0;
     private int current = 0;
@@ -74,10 +74,10 @@ public class Lexer {
     }
 
     /**
-     * Returns the tokens corresponding to comments.
+     * Returns the found trivia (like comments and blank lines).
      */
-    public List<Token> getComments() {
-        return comments;
+    public List<Trivia> getTrivia() {
+        return this.trivia;
     }
 
     private void scanToken() {
@@ -459,6 +459,11 @@ public class Lexer {
         String text = source.substring(start, current);
         Range range = new Range(startLine, currentLine, start - startLineStart, current - currentLineStart);
         tokens.add(new Token(type, text, literal, range));
+
+        if (type == TokenType.EOL && start - startLineStart == 0) {
+            // this is a blank line
+            this.trivia.add(new Trivia.BlankLine(currentLine));
+        }
     }
 
     /**
@@ -467,7 +472,7 @@ public class Lexer {
     private void addCommentToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
         Range range = new Range(startLine, currentLine, start - startLineStart, current - currentLineStart);
-        comments.add(new Token(type, text, literal, range));
+        this.trivia.add(new Trivia.Comment(new Token(type, text, literal, range)));
     }
 
     /**

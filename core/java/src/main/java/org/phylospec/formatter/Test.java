@@ -11,19 +11,27 @@ public class Test {
 
     static void main() {
         String text = """
-                 // this is a line comment
+                 // comment 1
+                 Real x = 5 // comment 2
+                  // comment 3
+                 data {
+                 // comment 4
+                     Real x = 5  // comment 5
+                     Real x = 100
+                 } 
                  
+                 // comment 6
+                 data {
+                     Real x = 5 
+                     Real x = 100
+                 } 
                  
+                 Real x = 5
                  
-                 // this is another line comment
-                 Real x = 10
-                 
-                 // this is a third line comment
-                 // this is a third line comment
-                 
-                 
-                 
-                 Real y = 10 // this is an end-of-line comment
+                 data { // comment 7
+                     Real x = 5 
+                     Real x = 100
+                 } 
               """;
 
         // run lexer

@@ -1,5 +1,6 @@
 package org.phylospec.formatter;
 
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class FormatToken {
@@ -7,6 +8,10 @@ public abstract class FormatToken {
     public abstract int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks);
 
     public abstract int getBaseWidth();
+
+    protected abstract boolean mustBreak();
+
+    protected abstract boolean canBreak();
 
     public static class Nest extends FormatToken {
         private FormatToken[] inner;
@@ -37,7 +42,8 @@ public abstract class FormatToken {
         public int format(StringBuilder stringBuilder, int maxWidth, int widthBefore, int widthAfter, int indent, boolean applyBreaks) {
             int baseWidth = this.getBaseWidth();
 
-            boolean applyBreaksHere = maxWidth < widthBefore + baseWidth + widthAfter;
+            boolean applyBreaksHere = this.mustBreak() || maxWidth < widthBefore + baseWidth + widthAfter;
+
             int oldIndent = indent;
 
             int numLineBreaks = 0;
@@ -97,12 +103,15 @@ public abstract class FormatToken {
         }
 
         @Override
+        protected boolean mustBreak() {
+            return Arrays.stream(this.inner).anyMatch(FormatToken::mustBreak);
+        }
+
+        @Override
         protected boolean canBreak() {
             return false;
         }
     }
-
-    protected abstract boolean canBreak();
 
     public static class Text extends FormatToken {
         private String text;
@@ -128,6 +137,11 @@ public abstract class FormatToken {
         @Override
         public int getBaseWidth() {
             return this.text.length();
+        }
+
+        @Override
+        protected boolean mustBreak() {
+            return false;
         }
 
         @Override
@@ -168,6 +182,11 @@ public abstract class FormatToken {
         }
 
         @Override
+        protected boolean mustBreak() {
+            return false;
+        }
+
+        @Override
         protected boolean canBreak() {
             return true;
         }
@@ -189,6 +208,11 @@ public abstract class FormatToken {
         @Override
         public int getBaseWidth() {
             return 0;
+        }
+
+        @Override
+        protected boolean mustBreak() {
+            return true;
         }
 
         @Override
