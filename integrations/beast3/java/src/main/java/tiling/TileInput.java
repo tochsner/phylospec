@@ -3,12 +3,14 @@ package tiling;
 
 import beastconfig.BEASTState;
 import org.phylospec.ast.AstNode;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import org.phylospec.typeresolver.StochasticityResolver;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,8 +85,8 @@ public abstract class TileInput<T> {
     /**
      * Applies the input tile and its descendents to the given beast state.
      */
-    public T apply(BEASTState beastState) {
-        return this.tile != null ? this.tile.apply(beastState) : null;
+    public T apply(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        return this.tile != null ? this.tile.apply(beastState, indexVariables) : null;
     }
 
     /* getter */

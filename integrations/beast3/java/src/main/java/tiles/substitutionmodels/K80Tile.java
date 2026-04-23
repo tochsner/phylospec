@@ -5,8 +5,11 @@ import beast.base.spec.evolution.substitutionmodel.Frequencies;
 import beast.base.spec.evolution.substitutionmodel.HKY;
 import beast.base.spec.inference.parameter.SimplexParam;
 import beast.base.spec.type.RealScalar;
+import org.phylospec.ast.Expr;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
+
+import java.util.IdentityHashMap;
 
 public class K80Tile extends GeneratorTile<HKY> {
 
@@ -18,8 +21,8 @@ public class K80Tile extends GeneratorTile<HKY> {
     GeneratorTileInput<RealScalar<PositiveReal>> kappaInput = new GeneratorTileInput<>("kappa");
 
     @Override
-    public HKY applyTile(BEASTState beastState) {
-        RealScalar<PositiveReal> kappa = this.kappaInput.apply(beastState);
+    public HKY applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        RealScalar<PositiveReal> kappa = this.kappaInput.apply(beastState, indexVariables);
 
         // k80 = hky with equal base frequencies
         SimplexParam equalFreqs = new SimplexParam(new double[]{0.25, 0.25, 0.25, 0.25});

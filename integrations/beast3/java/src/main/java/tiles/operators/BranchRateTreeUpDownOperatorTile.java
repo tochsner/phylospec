@@ -5,10 +5,12 @@ import beast.base.spec.domain.NonNegativeReal;
 import beast.base.spec.evolution.branchratemodel.Base;
 import beast.base.spec.evolution.operator.UpDownOperator;
 import beast.base.spec.inference.parameter.RealScalarParam;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import tiles.TemplateTile;
 import beastconfig.BEASTState;
 
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -32,9 +34,9 @@ public class BranchRateTreeUpDownOperatorTile extends TemplateTile<Void> {
     TemplateTileInput<?> partialSiteRateModel = new TemplateTileInput<>("$$siteRates", false);
 
     @Override
-    protected Void applyTile(BEASTState beastState) {
-        Tree tree = this.treeInput.apply(beastState);
-        Base branchRateModel = this.branchRateModelInput.apply(beastState);
+    protected Void applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        Tree tree = this.treeInput.apply(beastState, indexVariables);
+        Base branchRateModel = this.branchRateModelInput.apply(beastState, indexVariables);
 
         if (!(branchRateModel.meanRateInput.get() instanceof RealScalarParam<? extends NonNegativeReal> clockRate)) {
             return null;

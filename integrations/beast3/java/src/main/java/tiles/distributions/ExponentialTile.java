@@ -4,11 +4,13 @@ import beast.base.spec.domain.NonNegativeReal;
 import beast.base.spec.domain.PositiveReal;
 import beast.base.spec.inference.distribution.Exponential;
 import beast.base.spec.inference.parameter.RealScalarParam;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
 import tiling.BoundDistribution;
 
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 public class ExponentialTile extends GeneratorTile<BoundDistribution<RealScalarParam<NonNegativeReal>, Exponential>> {
@@ -26,8 +28,8 @@ public class ExponentialTile extends GeneratorTile<BoundDistribution<RealScalarP
     );
 
     @Override
-    public BoundDistribution<RealScalarParam<NonNegativeReal>, Exponential> applyTile(BEASTState beastState) {
-        RealScalarParam<PositiveReal> rate = this.rateInput.apply(beastState);
+    public BoundDistribution<RealScalarParam<NonNegativeReal>, Exponential> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        RealScalarParam<PositiveReal> rate = this.rateInput.apply(beastState, indexVariables);
         RealScalarParam<PositiveReal> mean = new RealScalarParam<>(1.0 / rate.get(), PositiveReal.INSTANCE);
 
         Exponential distribution = new Exponential();

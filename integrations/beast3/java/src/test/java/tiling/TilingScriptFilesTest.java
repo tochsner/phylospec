@@ -80,7 +80,7 @@ public class TilingScriptFilesTest {
 
             List<String> actualTileLines = new ArrayList<>();
 
-            EvaluateTiles evaluateTiles = new EvaluateTiles(TileLibrary.getTiles(), OperatorTileLibrary.getTiles(), variableResolver, stochasticityResolver);
+            EvaluateTiles evaluateTiles = new EvaluateTiles(TileLibrary.loadAll(), OperatorTileLibrary.getTiles(), variableResolver, stochasticityResolver);
             List<Tile<?>> bestTilings = null;
             try {
                 bestTilings = evaluateTiles.getBestTiling(statements);
@@ -95,9 +95,7 @@ public class TilingScriptFilesTest {
             for (int i = 0; i < expectedTileLines.size(); i++) {
                 String expected = expectedTileLines.get(i).trim();
                 String actual = actualTileLines.get(i).trim();
-                if (!actual.equals("TILING_SUCCESS")) {
-                    assertEquals(expected, actual, "Tile mismatch at index " + i + " for: " + psPath);
-                }
+                assertEquals(expected, actual, "Tile mismatch at index " + i + " for: " + psPath);
             }
 
             // apply tiles if tiling succeeded and compare application errors
@@ -112,7 +110,7 @@ public class TilingScriptFilesTest {
                 try {
                     BEASTState beastState = new BEASTState("test");
                     for (Tile<?> tile : bestTilings) {
-                        tile.apply(beastState);
+                        tile.apply(beastState, new IdentityHashMap<>());
                     }
                 } catch (TileApplicationError e) {
                     actualApplicationErrorLines.add(e.getMessage());
@@ -164,12 +162,4 @@ public class TilingScriptFilesTest {
         return expected;
     }
 
-    private ComponentResolver loadComponentResolver() {
-        try {
-            List<ComponentLibrary> libraries = ComponentResolver.loadCoreComponentLibraries();
-            return new ComponentResolver(libraries);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

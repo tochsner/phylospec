@@ -1,0 +1,12 @@
+Real vector1[i] = 100 for i in 1:0
+
+// EXPECTED_TILES
+// TILING_SUCCESS
+// EXPECTED_TILES
+
+// EXPECTED_APPLICATION_ERRORS
+// Invalid range. The start of a range has to be smaller than the end.
+// EXPECTED_APPLICATION_ERRORS
+
+// EXPECTED BEAST STATE
+// EXPECTED BEAST STATE

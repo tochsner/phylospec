@@ -5,11 +5,13 @@ import beast.base.evolution.tree.Tree;
 import beast.base.spec.evolution.likelihood.TreeLikelihood;
 import beast.base.spec.inference.parameter.RealVectorParam;
 import beastconfig.BEASTState;
+import org.phylospec.ast.Expr;
 import tiles.TemplateTile;
 import tiling.TilePriority;
 import tiling.TileApplicationError;
 import tiling.UnboundDistribution;
 
+import java.util.IdentityHashMap;
 import java.util.List;
 
 /**
@@ -54,7 +56,7 @@ public class VectorBranchRatesErrorTile extends TemplateTile<UnboundDistribution
     TemplateTileInput<?> siteRatesInput = new TemplateTileInput<>("$$siteRates", false);
 
     @Override
-    public UnboundDistribution<Alignment, TreeLikelihood> applyTile(BEASTState beastState) {
+    public UnboundDistribution<Alignment, TreeLikelihood> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
         throw new TileApplicationError(
                 this.rootNode,
                 "Explicit branch rates are not supported.",

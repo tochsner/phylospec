@@ -9,10 +9,14 @@ import beast.base.spec.inference.parameter.IntVectorParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.type.RealScalar;
 import beastconfig.BEASTState;
+import org.phylospec.ast.Expr;
 import tiles.GeneratorTile;
 import tiling.*;
 
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class RelaxedClockTile extends GeneratorTile<UCRelaxedClockModel> {
 
@@ -28,10 +32,10 @@ public class RelaxedClockTile extends GeneratorTile<UCRelaxedClockModel> {
     GeneratorTileInput<Tree> treeInput = new GeneratorTileInput<>("tree");
 
     @Override
-    protected UCRelaxedClockModel applyTile(BEASTState beastState) {
-        UnboundDistribution<? extends RealScalarParam<? extends PositiveReal>, ? extends ScalarDistribution<? extends RealScalar<? extends PositiveReal>, Double>> base = this.baseInput.apply(beastState);
-        RealScalarParam<PositiveReal> clockRate = this.clockRateInput.apply(beastState);
-        Tree tree = this.treeInput.apply(beastState);
+    protected UCRelaxedClockModel applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        UnboundDistribution<? extends RealScalarParam<? extends PositiveReal>, ? extends ScalarDistribution<? extends RealScalar<? extends PositiveReal>, Double>> base = this.baseInput.apply(beastState, indexVariables);
+        RealScalarParam<PositiveReal> clockRate = this.clockRateInput.apply(beastState, indexVariables);
+        Tree tree = this.treeInput.apply(beastState, indexVariables);
 
         // make sure that the distribution has mean rate 1.0
 
@@ -47,11 +51,13 @@ public class RelaxedClockTile extends GeneratorTile<UCRelaxedClockModel> {
 
         // init the branch rate categories
 
+        String id = this.getId("branchRateCategories", indexVariables, "");
+
         int numBranches = 2 * tree.getTaxaNames().length - 2;
         int[] rateArray = new int[numBranches];
         IntVectorParam<NonNegativeInt> rateCategories = new IntVectorParam<>(rateArray, NonNegativeInt.INSTANCE);
         beastState.addStateNode(rateCategories, new TypeToken<IntVectorParam<NonNegativeInt>>() {
-        }, "branchRateCategories");
+        }, id);
 
         // init the relaxed clock
 

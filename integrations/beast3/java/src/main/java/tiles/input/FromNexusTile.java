@@ -4,6 +4,7 @@ import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.parser.NexusParser;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
@@ -11,6 +12,7 @@ import tiling.TileApplicationError;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 public class FromNexusTile extends GeneratorTile<DecoratedAlignment> {
@@ -27,8 +29,8 @@ public class FromNexusTile extends GeneratorTile<DecoratedAlignment> {
     GeneratorTileInput<ParserTile.Parser> dateInput = new GeneratorTileInput<>("date", false);
 
     @Override
-    public DecoratedAlignment applyTile(BEASTState beastState) {
-        String path = this.fileInput.apply(beastState);
+    public DecoratedAlignment applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        String path = this.fileInput.apply(beastState, indexVariables);
         File file = new File(path);
 
         NexusParser nexusParser = new NexusParser();
@@ -47,8 +49,8 @@ public class FromNexusTile extends GeneratorTile<DecoratedAlignment> {
 
         // build age and date trait set if needed
 
-        ParserTile.Parser ageParser = this.ageInput.apply(beastState);
-        ParserTile.Parser dateParser = this.dateInput.apply(beastState);
+        ParserTile.Parser ageParser = this.ageInput.apply(beastState, indexVariables);
+        ParserTile.Parser dateParser = this.dateInput.apply(beastState, indexVariables);
 
         TraitSet ageTraitSet = null;
         if (ageParser != null) {

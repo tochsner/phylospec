@@ -4,11 +4,13 @@ import beast.base.spec.domain.PositiveReal;
 import beast.base.spec.inference.distribution.Dirichlet;
 import beast.base.spec.inference.parameter.SimplexParam;
 import beast.base.spec.type.RealVector;
+import org.phylospec.ast.Expr;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
 import tiling.BoundDistribution;
 
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 
 public class DirichletTile extends GeneratorTile<BoundDistribution<SimplexParam, Dirichlet>> {
 
@@ -20,8 +22,8 @@ public class DirichletTile extends GeneratorTile<BoundDistribution<SimplexParam,
     GeneratorTileInput<RealVector<PositiveReal>> concentrationInput = new GeneratorTileInput<>("concentration");
 
     @Override
-    public BoundDistribution<SimplexParam, Dirichlet> applyTile(BEASTState beastState) {
-        RealVector<PositiveReal> concentration = this.concentrationInput.apply(beastState);
+    public BoundDistribution<SimplexParam, Dirichlet> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        RealVector<PositiveReal> concentration = this.concentrationInput.apply(beastState, indexVariables);
 
         Dirichlet distribution = new Dirichlet();
         beastState.setInput(distribution, distribution.alphaInput, concentration);

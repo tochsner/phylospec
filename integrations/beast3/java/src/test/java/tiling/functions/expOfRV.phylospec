@@ -1,0 +1,12 @@
+Real y ~ Exponential(10.0)
+Real x = exp(y)
+
+// EXPECTED_TILES
+// TILING_SUCCESS
+// EXPECTED_TILES
+
+// EXPECTED BEAST STATE
+// SN: y
+// P: y_prior
+// CN: x
+// EXPECTED BEAST STATE

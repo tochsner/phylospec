@@ -12,6 +12,7 @@ import tiling.*;
 import tiles.AstNodeTile;
 
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,17 +22,13 @@ public class LiteralTile<T> extends AstNodeTile<T, Expr.Literal> {
 
     public LiteralTile() {
         this(new TypeToken<>() {
-        }, null);
+        }, null, null);
     }
 
-    public LiteralTile(TypeToken<T> typeToken, T value) {
+    public LiteralTile(TypeToken<T> typeToken, T value, Expr.Literal astNode) {
         this.typeToken = typeToken;
         this.value = value;
-    }
-
-    @Override
-    public Class<Expr.Literal> getTargetNodeType() {
-        return Expr.Literal.class;
+        this.setRootNode(astNode);
     }
 
     @Override
@@ -42,34 +39,34 @@ public class LiteralTile<T> extends AstNodeTile<T, Expr.Literal> {
 
         if (literal.value instanceof String string) {
             return Set.of(new LiteralTile<String>(new TypeToken<String>() {
-            }, string));
+            }, string, literal));
         }
 
         if (literal.value instanceof Integer number) {
             Set<Tile<?>> tiles = new HashSet<>();
 
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, number));
+            }, number, literal));
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, number.doubleValue()));
+            }, number.doubleValue(), literal));
 
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, new IntScalarParam<>(number, Int.INSTANCE)));
+            }, new IntScalarParam<>(number, Int.INSTANCE), literal));
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, new RealScalarParam<>(number.doubleValue(), Real.INSTANCE)));
+            }, new RealScalarParam<>(number.doubleValue(), Real.INSTANCE), literal));
 
             if (0 <= number) {
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new IntScalarParam<>(number, NonNegativeInt.INSTANCE)));
+                }, new IntScalarParam<>(number, NonNegativeInt.INSTANCE), literal));
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new RealScalarParam<>(number.doubleValue(), NonNegativeReal.INSTANCE)));
+                }, new RealScalarParam<>(number.doubleValue(), NonNegativeReal.INSTANCE), literal));
             }
 
             if (0 < number) {
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new IntScalarParam<>(number, PositiveInt.INSTANCE)));
+                }, new IntScalarParam<>(number, PositiveInt.INSTANCE), literal));
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new RealScalarParam<>(number.doubleValue(), PositiveReal.INSTANCE)));
+                }, new RealScalarParam<>(number.doubleValue(), PositiveReal.INSTANCE), literal));
             }
 
             return tiles;
@@ -79,24 +76,24 @@ public class LiteralTile<T> extends AstNodeTile<T, Expr.Literal> {
             Set<Tile<?>> tiles = new HashSet<>();
 
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, number));
+            }, number, literal));
 
             tiles.add(new LiteralTile<>(new TypeToken<>() {
-            }, new RealScalarParam<>(number, Real.INSTANCE)));
+            }, new RealScalarParam<>(number, Real.INSTANCE), literal));
 
             if (0 <= number) {
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new RealScalarParam<>(number, NonNegativeReal.INSTANCE)));
+                }, new RealScalarParam<>(number, NonNegativeReal.INSTANCE), literal));
             }
 
             if (0 < number) {
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new RealScalarParam<>(number, PositiveReal.INSTANCE)));
+                }, new RealScalarParam<>(number, PositiveReal.INSTANCE), literal));
             }
 
             if (0 < number && number < 1) {
                 tiles.add(new LiteralTile<>(new TypeToken<>() {
-                }, new RealScalarParam<>(number, UnitInterval.INSTANCE)));
+                }, new RealScalarParam<>(number, UnitInterval.INSTANCE), literal));
             }
 
             return tiles;
@@ -106,7 +103,7 @@ public class LiteralTile<T> extends AstNodeTile<T, Expr.Literal> {
     }
 
     @Override
-    public T applyTile(BEASTState beastState) {
+    public T applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
         return this.value;
     }
 
@@ -118,6 +115,6 @@ public class LiteralTile<T> extends AstNodeTile<T, Expr.Literal> {
     @Override
     protected Tile<?> createInstance() {
         return new LiteralTile<>(new TypeToken<>() {
-        }, null);
+        }, null, null);
     }
 }

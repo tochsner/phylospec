@@ -17,6 +17,7 @@ import tiling.FailedTilingAttempt;
 import tiling.Tile;
 
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,9 +61,9 @@ public class RepeatSimplexTile extends GeneratorTile<SimplexParam> {
     }
 
     @Override
-    public SimplexParam applyTile(BEASTState beastState) {
-        double value = this.valueInput.apply(beastState).get();
-        int num = this.numInput.apply(beastState).get();
+    public SimplexParam applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        double value = this.valueInput.apply(beastState, indexVariables).get();
+        int num = this.numInput.apply(beastState, indexVariables).get();
 
         double[] values = new double[num];
         Arrays.fill(values, value);

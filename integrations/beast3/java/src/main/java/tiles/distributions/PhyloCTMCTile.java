@@ -10,34 +10,31 @@ import beast.base.spec.evolution.likelihood.TreeLikelihood;
 import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beastconfig.BEASTState;
+import org.phylospec.ast.Expr;
+import tiles.GeneratorTile;
 import tiles.TemplateTile;
 import tiling.*;
 
-public class PhyloCTMCTile extends TemplateTile<UnboundDistribution<Alignment, TreeLikelihood>> {
+import java.util.IdentityHashMap;
+
+public class PhyloCTMCTile extends GeneratorTile<UnboundDistribution<Alignment, TreeLikelihood>> {
 
     @Override
-    protected String getPhyloSpecTemplate() {
-        return """
-               PhyloCTMC(
-                  tree=$tree,
-                  qMatrix=$substitutionModel,
-                  branchRates~$$branchRateModel,
-                  siteRates~$$partialSiteRateModel
-               )
-               """;
+    public String getPhyloSpecGeneratorName() {
+        return "PhyloCTMC";
     }
 
-    TemplateTileInput<Tree> treeInput = new TemplateTileInput<>("$tree");
-    TemplateTileInput<SubstitutionModel> substitutionModelInput = new TemplateTileInput<>("$substitutionModel", true);
-    TemplateTileInput<Base> branchRateModelInput = new TemplateTileInput<>("$$branchRateModel", false);
-    TemplateTileInput<Partial<SiteModel, SubstitutionModel>> partialSiteRateModel = new TemplateTileInput<>("$$partialSiteRateModel", false);
+    GeneratorTileInput<Tree> treeInput = new GeneratorTileInput<>("tree");
+    GeneratorTileInput<SubstitutionModel> substitutionModelInput = new GeneratorTileInput<>("qMatrix", true);
+    GeneratorTileInput<Base> branchRateModelInput = new GeneratorTileInput<>("branchRates", false);
+    GeneratorTileInput<Partial<SiteModel, SubstitutionModel>> partialSiteRateModel = new GeneratorTileInput<>("siteRates", false);
 
     @Override
-    public UnboundDistribution<Alignment, TreeLikelihood> applyTile(BEASTState beastState) {
-        Tree tree = this.treeInput.apply(beastState);
-        SubstitutionModel substitutionModel = this.substitutionModelInput.apply(beastState);
-        Base branchRateModel = this.branchRateModelInput.apply(beastState);
-        Partial<SiteModel, SubstitutionModel> partialSiteModel = this.partialSiteRateModel.apply(beastState);
+    public UnboundDistribution<Alignment, TreeLikelihood> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        Tree tree = this.treeInput.apply(beastState, indexVariables);
+        SubstitutionModel substitutionModel = this.substitutionModelInput.apply(beastState, indexVariables);
+        Base branchRateModel = this.branchRateModelInput.apply(beastState, indexVariables);
+        Partial<SiteModel, SubstitutionModel> partialSiteModel = this.partialSiteRateModel.apply(beastState, indexVariables);
 
         // initialize clock model
 

@@ -5,10 +5,12 @@ import beast.base.spec.domain.Real;
 import beast.base.spec.inference.parameter.IntScalarParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
 
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 public class LinSpaceTile extends GeneratorTile<RealVectorParam<Real>> {
@@ -29,10 +31,10 @@ public class LinSpaceTile extends GeneratorTile<RealVectorParam<Real>> {
     );
 
     @Override
-    public RealVectorParam<Real> applyTile(BEASTState beastState) {
-        double start = this.startInput.apply(beastState).get();
-        double end = this.endInput.apply(beastState).get();
-        int num = this.numInput.apply(beastState).get();
+    public RealVectorParam<Real> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        double start = this.startInput.apply(beastState, indexVariables).get();
+        double end = this.endInput.apply(beastState, indexVariables).get();
+        int num = this.numInput.apply(beastState, indexVariables).get();
 
         double[] values = new double[num];
 

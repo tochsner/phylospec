@@ -2,9 +2,12 @@ package tiles.rpn;
 
 import beast.base.spec.inference.util.RPNcalculator;
 import beastconfig.BEASTState;
+import org.phylospec.ast.Expr;
 import org.phylospec.ast.Stmt;
 import tiles.AstNodeTile;
 import tiling.TypeToken;
+
+import java.util.IdentityHashMap;
 
 public class RPNAssignmentTile extends AstNodeTile<RPNCalculationResult, Stmt.Assignment> {
 
@@ -13,13 +16,8 @@ public class RPNAssignmentTile extends AstNodeTile<RPNCalculationResult, Stmt.As
     );
 
     @Override
-    public Class<Stmt.Assignment> getTargetNodeType() {
-        return Stmt.Assignment.class;
-    }
-
-    @Override
-    public RPNCalculationResult applyTile(BEASTState beastState) {
-        RPNCalculationResult calculationResult = this.expressionInput.apply(beastState);
+    public RPNCalculationResult applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        RPNCalculationResult calculationResult = this.expressionInput.apply(beastState, indexVariables);
 
         RPNcalculator rpnCalculator = new RPNcalculator();
         beastState.setInput(rpnCalculator, rpnCalculator.strExpressionInput, calculationResult.calculation());

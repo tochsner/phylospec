@@ -5,12 +5,14 @@ import beast.base.spec.domain.Real;
 import beast.base.spec.inference.parameter.IntScalarParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
+import org.phylospec.ast.Expr;
 import org.phylospec.typeresolver.Stochasticity;
 import tiles.GeneratorTile;
 import beastconfig.BEASTState;
 import tiling.TypeToken;
 
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 public class RepeatRealTile extends GeneratorTile<RealVectorParam<Real>> {
@@ -28,9 +30,9 @@ public class RepeatRealTile extends GeneratorTile<RealVectorParam<Real>> {
     );
 
     @Override
-    public RealVectorParam<Real> applyTile(BEASTState beastState) {
-        double value = this.valueInput.apply(beastState).get();
-        int num = this.numInput.apply(beastState).get();
+    public RealVectorParam<Real> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        double value = this.valueInput.apply(beastState, indexVariables).get();
+        int num = this.numInput.apply(beastState, indexVariables).get();
 
         double[] values = new double[num];
         Arrays.fill(values, value);
@@ -41,10 +43,8 @@ public class RepeatRealTile extends GeneratorTile<RealVectorParam<Real>> {
     @Override
     public TypeToken<?> getTypeToken() {
         // extract the domain type arg from RealScalarParam<D> to produce RealVectorParam<D>
-        TypeToken<?> valueType = this.valueInput.getTypeToken();
-        if (valueType != null && valueType.getType() instanceof java.lang.reflect.ParameterizedType pt) {
-            return TypeToken.parameterized(RealVectorParam.class, pt.getActualTypeArguments()[0]);
-        }
+        TypeToken<?> domainArg = TypeToken.firstConcreteTypeArg(this.valueInput.getTypeToken());
+        if (domainArg != null) return TypeToken.parameterized(RealVectorParam.class, domainArg.getType());
 
         // we return the basic vector type
         return super.getTypeToken();

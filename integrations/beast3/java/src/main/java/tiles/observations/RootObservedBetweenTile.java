@@ -6,8 +6,11 @@ import beast.base.spec.domain.Real;
 import beast.base.spec.evolution.tree.MRCAPrior;
 import beast.base.spec.inference.distribution.Uniform;
 import beast.base.spec.inference.parameter.RealScalarParam;
+import org.phylospec.ast.Expr;
 import tiles.TemplateTile;
 import beastconfig.BEASTState;
+
+import java.util.IdentityHashMap;
 
 public class RootObservedBetweenTile extends TemplateTile<RealScalarParam<PositiveReal>> {
 
@@ -21,10 +24,10 @@ public class RootObservedBetweenTile extends TemplateTile<RealScalarParam<Positi
     TemplateTileInput<RealScalarParam<Real>> toInput = new TemplateTileInput<>("$to");
 
     @Override
-    public RealScalarParam<PositiveReal> applyTile(BEASTState beastState) {
-        Tree tree = this.treeInput.apply(beastState);
-        RealScalarParam<Real> from = this.fromInput.apply(beastState);
-        RealScalarParam<Real> to = this.toInput.apply(beastState);
+    public RealScalarParam<PositiveReal> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        Tree tree = this.treeInput.apply(beastState, indexVariables);
+        RealScalarParam<Real> from = this.fromInput.apply(beastState, indexVariables);
+        RealScalarParam<Real> to = this.toInput.apply(beastState, indexVariables);
 
         // we create a uniform distribution as our prior
 
@@ -41,7 +44,7 @@ public class RootObservedBetweenTile extends TemplateTile<RealScalarParam<Positi
 
         // we add the prior as likelihood to the beast state
 
-        beastState.addLikelihoodDistribution(from, prior, "rootCalibration");
+        beastState.addLikelihoodDistribution(prior, "rootCalibration");
 
         // we return the observed root age
 

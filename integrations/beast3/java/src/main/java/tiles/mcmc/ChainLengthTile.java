@@ -1,6 +1,7 @@
 package tiles.mcmc;
 
 import org.phylospec.ast.AstNode;
+import org.phylospec.ast.Expr;
 import org.phylospec.ast.Stmt;
 import org.phylospec.typeresolver.Stochasticity;
 import org.phylospec.typeresolver.StochasticityResolver;
@@ -10,6 +11,7 @@ import beastconfig.BEASTState;
 import tiling.FailedTilingAttempt;
 import tiling.Tile;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,8 +40,8 @@ public class ChainLengthTile extends TemplateTile<Void> {
     }
 
     @Override
-    protected Void applyTile(BEASTState beastState) {
-        beastState.chainLength = this.chainLengthInput.apply(beastState);
+    protected Void applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
+        beastState.chainLength = this.chainLengthInput.apply(beastState, indexVariables);
         return null;
     }
 

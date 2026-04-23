@@ -1,6 +1,5 @@
 package tiles.misc;
 
-import beast.base.core.BEASTObject;
 import org.phylospec.Utils;
 import org.phylospec.ast.AstNode;
 import org.phylospec.ast.Expr;
@@ -10,10 +9,11 @@ import tiles.AstNodeTile;
 import beastconfig.BEASTState;
 import tiling.FailedTilingAttempt;
 import tiling.Tile;
+import tiling.TypeToken;
 
 import java.util.*;
 
-public class ListVectorTile<T> extends AstNodeTile<List<Object>, Expr.Array> {
+public class ListVectorTile extends AstNodeTile<List<Object>, Expr.Array> {
 
     private final List<Tile<?>> inputTiles;
 
@@ -23,11 +23,6 @@ public class ListVectorTile<T> extends AstNodeTile<List<Object>, Expr.Array> {
 
     public ListVectorTile(List<Tile<?>> inputTiles) {
         this.inputTiles = inputTiles;
-    }
-
-    @Override
-    public Class<Expr.Array> getTargetNodeType() {
-        return Expr.Array.class;
     }
 
     @Override
@@ -43,7 +38,11 @@ public class ListVectorTile<T> extends AstNodeTile<List<Object>, Expr.Array> {
         Set<Tile<?>> wiredUpTiles = new HashSet<>();
         Utils.visitCombinations(
                 allPossibleInputTiles, inputTiles -> {
-                    Tile<?> tile = new ListVectorTile<>(inputTiles);
+                    // make sure that all input tiles have the same type token
+                    TypeToken<?> firstToken = inputTiles.getFirst().getTypeToken();
+                    if (inputTiles.stream().anyMatch(t -> !Objects.equals(t.getTypeToken(), firstToken))) return;
+
+                    Tile<?> tile = new ListVectorTile(inputTiles);
                     tile.setRootNode(node);
 
                     int totalWeight = inputTiles.stream().mapToInt(Tile::getWeight).sum();
@@ -57,14 +56,23 @@ public class ListVectorTile<T> extends AstNodeTile<List<Object>, Expr.Array> {
     }
 
     @Override
-    public List<Object> applyTile(BEASTState beastState) {
+    public List<Object> applyTile(BEASTState beastState, IdentityHashMap<Expr.Variable, Integer> indexVariables) {
         List<Object> list = new ArrayList<>();
 
         for (Tile<?> tile : inputTiles) {
-            list.add(tile.apply(beastState));
+            list.add(tile.apply(beastState, indexVariables));
         }
 
         return list;
+    }
+
+    @Override
+    public TypeToken<?> getTypeToken() {
+        TypeToken<?> valueType = this.inputTiles.getFirst().getTypeToken();
+        if (valueType != null) return TypeToken.listOf(valueType);
+
+        // we return the basic vector type
+        return super.getTypeToken();
     }
 
 }
