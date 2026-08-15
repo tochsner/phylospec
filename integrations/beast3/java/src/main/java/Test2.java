@@ -1,3 +1,4 @@
+import org.phylospec.runner.PhyloSpecRunner;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;

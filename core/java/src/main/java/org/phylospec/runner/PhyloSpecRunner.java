@@ -1,3 +1,5 @@
+package org.phylospec.runner;
+
 import org.phylospec.ast.transformers.EvaluateScalarFunctions;
 import org.phylospec.tiling.EvaluateTiles;
 import org.phylospec.tiling.errors.TileApplicationError;
@@ -32,49 +34,38 @@ import java.util.List;
 /// into runnable objects {@code E} and executing them — is left to subclasses via
 /// {@link #buildEngineObjects} and {@link #runEngineObjects}.
 ///
+/// {@link #parseAndResolve} and {@link #tile} are exposed as {@code protected} so an engine with
+/// a richer public API than the default {@link #runPhyloSpec} entry point (e.g. one that exposes
+/// its own intermediate build stages) can reuse the shared front half without duplicating it.
+///
 /// @param <S> the state type accumulated during tiling (e.g. {@code BEASTState})
 /// @param <E> the runnable engine object type produced from that state (e.g. {@code MCMC})
 public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
 
-    /**
-     * Default chain length used when none is passed to the constructor.
-     * Individual PhyloSpec scripts may still override this via a {@code chainLength} assignment.
-     */
-    public static final long DEFAULT_CHAIN_LENGTH = 10_00_000;
-
     protected final String source;
-    protected final long defaultChainLength;
 
     /**
-     * Constructs a runner for the given PhyloSpec source code, using the default chain length.
+     * Constructs a runner for the given PhyloSpec source code.
      */
     protected PhyloSpecRunner(String source) {
-        this(source, DEFAULT_CHAIN_LENGTH);
-    }
-
-    /**
-     * Constructs a runner for the given PhyloSpec source code, using the given default chain length.
-     */
-    protected PhyloSpecRunner(String source, long defaultChainLength) {
         this.source = source;
-        this.defaultChainLength = defaultChainLength;
     }
 
     /**
-     * Runs the full PhyloSpec-to-engine pipeline for the given run name.
-     * Any error detected during lexing, parsing, type resolution, or tiling is reported
-     * via {@link #errorDetected} and terminates the process immediately.
+     * Runs the full PhyloSpec-to-engine pipeline for the given run name, and returns the engine
+     * object once it has run. Any error detected during lexing, parsing, type resolution, or
+     * tiling is reported via {@link #errorDetected}.
      *
      * <p>The pipeline has four steps: parse and resolve the source (shared), apply tiles to
      * build up the engine-specific state (shared), build the engine's runnable objects from
      * that state ({@link #buildEngineObjects}, engine-specific), and run them
      * ({@link #runEngineObjects}, engine-specific).
      */
-    public final void runPhyloSpec(String runName) throws IOException, ParserConfigurationException, SAXException {
-        ParsedPhyloSpec parsed = this.parseAndResolve();
-        S state = this.tile(parsed, runName);
+    public final E runPhyloSpec(String runName) throws IOException, ParserConfigurationException, SAXException {
+        S state = this.tile(this.parseAndResolve(), runName);
         E engine = this.buildEngineObjects(state);
         this.runEngineObjects(engine);
+        return engine;
     }
 
     /* --- Engine-specific hooks, implemented by subclasses. --- */
@@ -102,13 +93,20 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
      */
     protected abstract void runEngineObjects(E engine);
 
+    /**
+     * Reports an error detected during lexing, parsing, type resolution, or tiling. Each engine
+     * owns its own error-reporting policy (e.g. printing and exiting, or throwing).
+     */
+    @Override
+    public abstract void errorDetected(Error error);
+
     /* --- Shared front half of the pipeline. --- */
 
     /**
      * Lexes and parses the source, simplifies the AST, and resolves variables, types, and
      * stochasticity. Shared by all engines.
      */
-    private ParsedPhyloSpec parseAndResolve() {
+    protected final ParsedPhyloSpec parseAndResolve() {
         ComponentResolver componentResolver = loadComponentResolver();
 
         // run lexer
@@ -155,7 +153,7 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
      * Applies this engine's tile library to the resolved PhyloSpec AST, building up the
      * engine-specific state object. Shared by all engines.
      */
-    private S tile(ParsedPhyloSpec parsed, String runName) {
+    protected final S tile(ParsedPhyloSpec parsed, String runName) {
         EvaluateTiles<S> applyTiles = new EvaluateTiles<>(
                 this.getTileLibrary(), new ArrayList<>(), parsed.variableResolver, parsed.stochasticityResolver);
 
@@ -185,6 +183,7 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
     }
 
     /**
+<<<<<<< HEAD:integrations/beast3/java/src/main/java/PhyloSpecRunner.java
      * Prints the error to standard output and exits the process.
      */
     @Override
@@ -201,6 +200,8 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
         System.out.println(warning.toStdOutString(this.source, true));
     }
     /**
+=======
+>>>>>>> 7a5c9b63 (Move the general runner logic into the core.):core/java/src/main/java/org/phylospec/runner/PhyloSpecRunner.java
      * Internal container for the parsed and resolved PhyloSpec program.
      * It keeps the parser so that later tiling errors can still be mapped back to source-code
      * ranges.
