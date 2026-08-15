@@ -13,7 +13,7 @@ import java.util.List;
 /// Builds the BEAST {@code State} and prior/likelihood/posterior distributions, fills in any
 /// operators and loggers the tiles didn't already choose explicitly (via {@link OperatorSelector}
 /// and {@link LoggerSelector}), and wires everything into an {@code MCMC} object. Does not run
-/// the MCMC; that's left to the caller (see {@code BEASTMCMCRunner#runEngineObjects}).
+/// the MCMC; that's left to the caller (see {@code Beast3Runner#runEngineObjects}).
 public final class MCMCAssembler {
 
     private MCMCAssembler() {

@@ -1,9 +1,7 @@
 import dr.inference.mcmc.MCMC;
 import org.phylospec.errors.Error;
 import org.phylospec.runner.PhyloSpecRunner;
-import org.phylospec.tiling.tiles.CandidateTile;
 import org.xml.sax.SAXException;
-import tiles.BeastXTileLibraries;
 import tiling.BeastXModel;
 import tiling.BeastXState;
 import tiling.runner.RunMode;
@@ -19,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 
 /*
 * Entry point for running PhyloSpec models with the BEAST X backend.
@@ -37,10 +34,17 @@ public class BeastXRunner extends PhyloSpecRunner<BeastXState, MCMC> {
     private final BeastXRunPipeline runPipeline;
 
     /**
-     * Creates a runner for the given PhyloSpec source string.
+     * Creates a runner for the given PhyloSpec source string, using the default chain length.
      */
     public BeastXRunner(String source) {
-        super(source);
+        this(source, DEFAULT_CHAIN_LENGTH);
+    }
+
+    /**
+     * Creates a runner for the given PhyloSpec source string, using the given default chain length.
+     */
+    public BeastXRunner(String source, long defaultChainLength) {
+        super(source, defaultChainLength);
 
         this.runPipeline =
                 new BeastXRunPipeline();
@@ -292,12 +296,14 @@ public class BeastXRunner extends PhyloSpecRunner<BeastXState, MCMC> {
 
     @Override
     protected BeastXState createState(String runName) {
-        return new BeastXState(runName);
+        BeastXState state = new BeastXState(runName);
+        state.chainLength = this.defaultChainLength;
+        return state;
     }
 
     @Override
-    protected List<CandidateTile<BeastXState>> getTileLibrary() {
-        return BeastXTileLibraries.loadAll();
+    protected Class<BeastXState> getStateClass() {
+        return BeastXState.class;
     }
 
     /**

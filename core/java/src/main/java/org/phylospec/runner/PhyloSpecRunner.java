@@ -2,8 +2,8 @@ package org.phylospec.runner;
 
 import org.phylospec.ast.transformers.EvaluateScalarFunctions;
 import org.phylospec.tiling.EvaluateTiles;
+import org.phylospec.tiling.TileLibrary;
 import org.phylospec.tiling.errors.TileApplicationError;
-import org.phylospec.tiling.tiles.CandidateTile;
 import org.phylospec.ast.Stmt;
 import org.phylospec.ast.transformers.EvaluateLiterals;
 import org.phylospec.ast.transformers.RemoveGroupings;
@@ -42,13 +42,28 @@ import java.util.List;
 /// @param <E> the runnable engine object type produced from that state (e.g. {@code MCMC})
 public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
 
+    /**
+     * Default chain length used when none is passed to the constructor.
+     * Individual PhyloSpec scripts may still override this via a {@code chainLength} assignment.
+     */
+    public static final long DEFAULT_CHAIN_LENGTH = 1_000_000;
+
     protected final String source;
+    protected final long defaultChainLength;
 
     /**
-     * Constructs a runner for the given PhyloSpec source code.
+     * Constructs a runner for the given PhyloSpec source code, using the default chain length.
      */
     protected PhyloSpecRunner(String source) {
+        this(source, DEFAULT_CHAIN_LENGTH);
+    }
+
+    /**
+     * Constructs a runner for the given PhyloSpec source code, using the given default chain length.
+     */
+    protected PhyloSpecRunner(String source, long defaultChainLength) {
         this.source = source;
+        this.defaultChainLength = defaultChainLength;
     }
 
     /**
@@ -77,10 +92,10 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
     protected abstract S createState(String runName);
 
     /**
-     * Returns the tile library to use when tiling the parsed PhyloSpec AST into the state
-     * object.
+     * Returns the state type this runner's tiles apply to, used to automatically pick out the
+     * matching {@link TileLibrary} implementations via {@link TileLibrary#loadAll}.
      */
-    protected abstract List<CandidateTile<S>> getTileLibrary();
+    protected abstract Class<S> getStateClass();
 
     /**
      * Builds the engine's runnable objects from the fully-tiled state.
@@ -155,7 +170,7 @@ public abstract class PhyloSpecRunner<S, E> implements ErrorEventListener {
      */
     protected final S tile(ParsedPhyloSpec parsed, String runName) {
         EvaluateTiles<S> applyTiles = new EvaluateTiles<>(
-                this.getTileLibrary(), new ArrayList<>(), parsed.variableResolver, parsed.stochasticityResolver);
+                TileLibrary.loadAll(this.getStateClass()), new ArrayList<>(), parsed.variableResolver, parsed.stochasticityResolver);
 
         S state = this.createState(runName);
 

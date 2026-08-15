@@ -12,7 +12,7 @@ public class Test3 {
     static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         Path path = Path.of("/Users/ochsneto/Documents/PhyloSpec/phylospec/examples/model.phylospec");
         String source = Files.readString(path, StandardCharsets.UTF_8);
-        PhyloSpecRunner<?, ?> parser = new BEASTMCMCRunner(source);
+        PhyloSpecRunner<?, ?> parser = new Beast3Runner(source);
         parser.runPhyloSpec(path.getFileName().toString());
     }
 
