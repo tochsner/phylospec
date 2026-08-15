@@ -31,7 +31,7 @@ public class BeastXRelaxedClockCategoryOperatorTest {
     @Test
     public void categoryOperatorsUseIntegerMovesAndParameterBounds() throws Exception {
         BeastXState state =
-                PhyloSpecRunner
+                BeastXRunner
                         .fromFile(RELAXED_CLOCK_MODEL)
                         .buildState("relaxedClockCategoryOperators");
 

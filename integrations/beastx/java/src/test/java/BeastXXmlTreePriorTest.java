@@ -27,7 +27,7 @@ public class BeastXXmlTreePriorTest {
                 """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("yuleUnscaledParity");
 
         SpeciationLikelihood treePrior =

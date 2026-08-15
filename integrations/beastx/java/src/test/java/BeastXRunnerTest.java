@@ -23,7 +23,7 @@ public class BeastXRunnerTest {
                 """;
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("runnerFacadeState")
                                         .mode(RunMode.BUILD_STATE)
@@ -46,7 +46,7 @@ public class BeastXRunnerTest {
                 """;
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("runnerFacadeModel")
                                         .mode(RunMode.BUILD_MODEL)
@@ -92,7 +92,7 @@ public class BeastXRunnerTest {
                 """.formatted(logPath.toString().replace("\\", "/"));
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("runnerFacadeExecution")
                                         .mode(RunMode.EXECUTE_MCMC)

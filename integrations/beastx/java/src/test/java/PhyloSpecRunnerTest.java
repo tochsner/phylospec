@@ -221,8 +221,8 @@ public class PhyloSpecRunnerTest {
         String source =
                 readSource("src/test/java/tiling/functions/rangeEmpty.phylospec");
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         PhyloSpecRunnerException error =
                 assertThrows(
@@ -248,8 +248,8 @@ public class PhyloSpecRunnerTest {
                 )
                 """;
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         PhyloSpecRunnerException error =
                 assertThrows(
@@ -274,8 +274,8 @@ public class PhyloSpecRunnerTest {
                 )
                 """;
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         PhyloSpecRunnerException error =
                 assertThrows(
@@ -314,8 +314,8 @@ public class PhyloSpecRunnerTest {
                 Real x ~ Normal(mean=0.0, sd=1.0)
                 """;
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         MCMC mcmc =
                 runner.buildMCMC("test", 1);
@@ -331,8 +331,8 @@ public class PhyloSpecRunnerTest {
         String source =
                 readSource("src/test/java/tiling/phyloctmc/mostBasic.phylospec");
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         IllegalStateException error =
                 assertThrows(
@@ -348,15 +348,15 @@ public class PhyloSpecRunnerTest {
     }
 
     private BeastXModel buildModelFromSource(String source) throws Exception {
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         return runner.buildModel("test");
     }
 
     private BeastXState buildStateFromSource(String source) throws Exception {
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         return runner.buildState("test");
     }

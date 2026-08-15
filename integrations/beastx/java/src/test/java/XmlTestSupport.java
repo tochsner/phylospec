@@ -43,7 +43,7 @@ public final class XmlTestSupport {
     }
 
     public static BeastXModel buildModel(String runName, String source) throws Exception {
-        return new PhyloSpecRunner(source)
+        return new BeastXRunner(source)
                 .buildModel(runName);
     }
 

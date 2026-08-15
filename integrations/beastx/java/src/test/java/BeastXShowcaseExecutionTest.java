@@ -172,15 +172,15 @@ public class BeastXShowcaseExecutionTest {
             List<String> expectedLogColumns
     ) {
         try {
-            PhyloSpecRunner runner =
-                    new PhyloSpecRunner(source);
+            BeastXRunner runner =
+                    new BeastXRunner(source);
 
             MCMC mcmc =
                     runner.runMCMC(modelName);
 
             assertNotNull(
                     mcmc,
-                    "Expected PhyloSpecRunner.runMCMC to return the executed MCMC object."
+                    "Expected BeastXRunner.runMCMC to return the executed MCMC object."
             );
 
             LogCheck logCheck =

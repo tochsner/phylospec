@@ -282,7 +282,7 @@ public class BeastXXmlNucleotidePhyloCTMCTest {
                 );
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("xmlFixedGTRPhyloCTMC");
 
         new StateXmlGenerator()
@@ -529,7 +529,7 @@ public class BeastXXmlNucleotidePhyloCTMCTest {
                 );
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("xmlPartitionedSiteGtrHkyPhyloCTMC");
 
         new StateXmlGenerator()
@@ -695,7 +695,7 @@ public class BeastXXmlNucleotidePhyloCTMCTest {
                 );
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("xmlRelaxedClockPhyloCTMC");
 
         new StateXmlGenerator()
@@ -808,7 +808,7 @@ public class BeastXXmlNucleotidePhyloCTMCTest {
                 );
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("gammaPriorStrictClockPhyloCTMC");
 
         new StateXmlGenerator()

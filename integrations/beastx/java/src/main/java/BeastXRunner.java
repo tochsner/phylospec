@@ -1,22 +1,7 @@
 import dr.inference.mcmc.MCMC;
-import org.phylospec.ast.Stmt;
-import org.phylospec.ast.transformers.EvaluateLiterals;
-import org.phylospec.ast.transformers.EvaluateScalarFunctions;
-import org.phylospec.ast.transformers.RemoveGroupings;
-import org.phylospec.components.ComponentLibrary;
-import org.phylospec.components.ComponentResolver;
 import org.phylospec.errors.Error;
-import org.phylospec.errors.ErrorEventListener;
-import org.phylospec.lexer.Lexer;
-import org.phylospec.lexer.Range;
-import org.phylospec.lexer.Token;
-import org.phylospec.parser.Parser;
-import org.phylospec.tiling.EvaluateTiles;
-import org.phylospec.tiling.errors.TileApplicationError;
-import org.phylospec.typeresolver.StochasticityResolver;
-import org.phylospec.typeresolver.TypeError;
-import org.phylospec.typeresolver.TypeResolver;
-import org.phylospec.typeresolver.VariableResolver;
+import org.phylospec.runner.PhyloSpecRunner;
+import org.phylospec.tiling.tiles.CandidateTile;
 import org.xml.sax.SAXException;
 import tiles.BeastXTileLibraries;
 import tiling.BeastXModel;
@@ -31,9 +16,7 @@ import tiling.runner.BeastXRunPipeline;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.nio.file.Path;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -44,19 +27,20 @@ import java.util.List;
 * This class coordinates the full pipeline:
 * PhyloSpec source -> lexer/parser -> AST transforms -> type resolution
 * BEAST X tiling -> BeastXModel -> MCMC or XML execution.
+*
+* The lexer/parser/AST-transform/type-resolution/tiling front half is shared with other engines
+* via PhyloSpecRunner (see parseAndResolve/tile); everything past that (BeastXModel, MCMC, and the
+* XML-generation paths) is BEAST X-specific and lives entirely in this class and tiling.runner.*.
 * */
-public class PhyloSpecRunner implements ErrorEventListener {
-
-    private final String source;
+public class BeastXRunner extends PhyloSpecRunner<BeastXState, MCMC> {
 
     private final BeastXRunPipeline runPipeline;
 
     /**
      * Creates a runner for the given PhyloSpec source string.
      */
-    public PhyloSpecRunner(String source) {
-        this.source =
-                source;
+    public BeastXRunner(String source) {
+        super(source);
 
         this.runPipeline =
                 new BeastXRunPipeline();
@@ -67,13 +51,13 @@ public class PhyloSpecRunner implements ErrorEventListener {
     /**
      * Creates a runner from a PhyloSpec source file using UTF-8 encoding.
      */
-    public static PhyloSpecRunner fromFile(Path sourcePath)
+    public static BeastXRunner fromFile(Path sourcePath)
             throws IOException {
         if (sourcePath == null) {
             throw new IllegalArgumentException("sourcePath must not be null.");
         }
 
-        return new PhyloSpecRunner(
+        return new BeastXRunner(
                 Files.readString(sourcePath, StandardCharsets.UTF_8)
         );
     }
@@ -123,11 +107,8 @@ public class PhyloSpecRunner implements ErrorEventListener {
      */
     public BeastXRunResult run(RunnerOptions options)
             throws IOException, ParserConfigurationException, SAXException {
-        ParsedPhyloSpec parsed =
-                parseAndResolve();
-
         BeastXState beastState =
-                tile(parsed, options.runName());
+                this.tile(this.parseAndResolve(), options.runName());
 
         return this.runPipeline
                 .run(beastState, options);
@@ -138,10 +119,7 @@ public class PhyloSpecRunner implements ErrorEventListener {
      */
     public BeastXState buildState(String runName)
             throws IOException, ParserConfigurationException, SAXException {
-        ParsedPhyloSpec parsed =
-                parseAndResolve();
-
-        return tile(parsed, runName);
+        return this.tile(this.parseAndResolve(), runName);
     }
 
     /**
@@ -310,121 +288,32 @@ public class PhyloSpecRunner implements ErrorEventListener {
         );
     }
 
-    /* --- Internal methods parsing a PhyloSpec script and executing the tiling algorithm --- */
+    /* --- Engine-specific hooks required by PhyloSpecRunner. --- */
 
-    /**
-     * Parses the PhyloSpec source and prepares it for tiling.
-     *
-     * This includes lexical scanning, parsing, AST simplification, variable
-     * resolution, type checking, and stochasticity analysis.
-     */
-    private ParsedPhyloSpec parseAndResolve() {
-        ComponentResolver componentResolver =
-                loadComponentResolver();
+    @Override
+    protected BeastXState createState(String runName) {
+        return new BeastXState(runName);
+    }
 
-        // Tokenize the PhyloSpec source.
-        Lexer lexer =
-                new Lexer(this.source);
-
-        lexer.registerEventListener(this);
-
-        List<Token> tokens =
-                lexer.scanTokens();
-
-        // Parse tokens into PhyloSpec AST statements.
-        Parser parser =
-                new Parser(tokens);
-
-        parser.registerEventListener(this);
-
-        List<Stmt> statements =
-                parser.parse();
-
-        // Simplify the AST before type checking and tiling.
-        statements =
-                new RemoveGroupings().transform(statements);
-
-        statements =
-                new EvaluateLiterals().transform(statements);
-
-        statements =
-                new EvaluateScalarFunctions().transform(statements);
-
-        // Resolve variable references and validate component types.
-        VariableResolver variableResolver =
-                new VariableResolver(statements);
-
-        TypeResolver typeResolver =
-                new TypeResolver(componentResolver);
-
-        try {
-            typeResolver.visitStatements(statements);
-        } catch (TypeError error) {
-            Range range =
-                    parser.getRangeForAstNode(error.getAstNode());
-
-            this.errorDetected(error.toError(range));
-            throw new IllegalStateException("Unreachable after errorDetected.");
-        }
-
-        // Determine which statements or expressions are stochastic.
-        StochasticityResolver stochasticityResolver =
-                new StochasticityResolver();
-
-        stochasticityResolver.visitStatements(statements);
-
-        return new ParsedPhyloSpec(
-                parser,
-                statements,
-                variableResolver,
-                stochasticityResolver
-        );
+    @Override
+    protected List<CandidateTile<BeastXState>> getTileLibrary() {
+        return BeastXTileLibraries.loadAll();
     }
 
     /**
-     * Applies the BEAST X tile library to the resolved PhyloSpec AST.
-     *
-     * The resulting BeastXState is the backend-specific intermediate state used
-     * later to build a BEAST X model, MCMC object, or XML file.
+     * Builds the default (non-materialized) BEAST X model and MCMC. Used by the inherited
+     * one-shot {@link PhyloSpecRunner#runPhyloSpec}; callers wanting the staged/XML capabilities
+     * (materialized likelihoods, XML export, partial builds, ...) should use the dedicated public
+     * methods above instead.
      */
-    private BeastXState tile(
-            ParsedPhyloSpec parsed,
-            String runName
-    ) {
-        // Load all BEAST X backend tiles and prepare the tiling evaluator.
-        EvaluateTiles<BeastXState> applyTiles =
-                new EvaluateTiles<>(
-                        BeastXTileLibraries.loadAll(),
-                        new ArrayList<>(),
-                        parsed.variableResolver,
-                        parsed.stochasticityResolver
-                );
-
-        BeastXState beastState =
-                new BeastXState(runName);
-
-        try {
-            // Find and apply the best tile sequence for the parsed PhyloSpec statements.
-            applyTiles.getBestTiling(parsed.statements);
-            return applyTiles.applyBestTiling(beastState);
-        } catch (TileApplicationError error) {
-            Range range =
-                    parsed.parser.getRangeForAstNode(error.getAstNode());
-
-            this.errorDetected(error.toError(range));
-            throw new IllegalStateException("Unreachable after errorDetected.");
-        }
+    @Override
+    protected MCMC buildEngineObjects(BeastXState state) {
+        return this.runPipeline.buildMCMC(this.runPipeline.buildModel(state, false));
     }
 
-    private static ComponentResolver loadComponentResolver() {
-        try {
-            List<ComponentLibrary> componentLibraries =
-                    ComponentResolver.loadCoreComponentLibraries();
-
-            return new ComponentResolver(componentLibraries);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    protected void runEngineObjects(MCMC mcmc) {
+        mcmc.run();
     }
 
     /**
@@ -434,37 +323,5 @@ public class PhyloSpecRunner implements ErrorEventListener {
     @Override
     public void errorDetected(Error error) {
         throw new PhyloSpecRunnerException(error.toStdOutString(this.source));
-    }
-
-    /**
-     * Internal container for the parsed and resolved PhyloSpec program.
-     *
-     * It keeps the parser so that later tiling errors can still be mapped back
-     * to source-code ranges.
-     */
-    private static class ParsedPhyloSpec {
-        private final Parser parser;
-        private final List<Stmt> statements;
-        private final VariableResolver variableResolver;
-        private final StochasticityResolver stochasticityResolver;
-
-        private ParsedPhyloSpec(
-                Parser parser,
-                List<Stmt> statements,
-                VariableResolver variableResolver,
-                StochasticityResolver stochasticityResolver
-        ) {
-            this.parser =
-                    parser;
-
-            this.statements =
-                    statements;
-
-            this.variableResolver =
-                    variableResolver;
-
-            this.stochasticityResolver =
-                    stochasticityResolver;
-        }
     }
 }

@@ -52,7 +52,7 @@ public class BeastXObservedTreeDistributionTest {
     @Test
     public void bindsYuleLikelihoodToFixedObservedTree() throws Exception {
         BeastXModel model =
-                new PhyloSpecRunner(OBSERVED_YULE_SOURCE)
+                new BeastXRunner(OBSERVED_YULE_SOURCE)
                         .buildModel("observedYule");
 
         assertTrue(model.beastState.treePriorDistributions.isEmpty());
@@ -79,7 +79,7 @@ public class BeastXObservedTreeDistributionTest {
     @Test
     public void fixedObservedTreeDoesNotReceiveTreeOperators() throws Exception {
         BeastXModel model =
-                new PhyloSpecRunner(OBSERVED_YULE_SOURCE)
+                new BeastXRunner(OBSERVED_YULE_SOURCE)
                         .buildModel("observedYuleOperators");
 
         List<MCMCOperator> operators =
@@ -96,7 +96,7 @@ public class BeastXObservedTreeDistributionTest {
     @Test
     public void runsDirectMCMCWithObservedTreeKeptFixed() throws Exception {
         BeastXModel model =
-                new PhyloSpecRunner(OBSERVED_YULE_SOURCE)
+                new BeastXRunner(OBSERVED_YULE_SOURCE)
                         .buildModel("observedYuleDirectMCMC");
 
         MCMC mcmc =
@@ -109,7 +109,7 @@ public class BeastXObservedTreeDistributionTest {
     @Test
     public void bindsBirthDeathLikelihoodToFixedObservedTree() throws Exception {
         BeastXModel model =
-                new PhyloSpecRunner(OBSERVED_BIRTH_DEATH_SOURCE)
+                new BeastXRunner(OBSERVED_BIRTH_DEATH_SOURCE)
                         .buildModel("observedBirthDeath");
 
         assertTrue(model.beastState.treePriorDistributions.isEmpty());

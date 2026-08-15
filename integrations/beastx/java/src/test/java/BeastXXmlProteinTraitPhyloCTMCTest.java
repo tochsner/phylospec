@@ -92,7 +92,7 @@ public class BeastXXmlProteinTraitPhyloCTMCTest {
                 );
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("xmlProteinJTTPhyloCTMC");
 
         new StateXmlGenerator()
@@ -208,7 +208,7 @@ public class BeastXXmlProteinTraitPhyloCTMCTest {
                 """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .buildModel("xmlGY94CodonPhyloCTMC");
 
         UnsupportedOperationException exception =

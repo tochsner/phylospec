@@ -57,7 +57,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         BeastXState state =
-                new PhyloSpecRunner(source).buildState("test");
+                new BeastXRunner(source).buildState("test");
 
         assertEquals(2.0, state.operatorConfig.parameterOperatorWeight);
         assertEquals(0.5, state.operatorConfig.parameterScaleFactor);
@@ -88,7 +88,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source).buildModel("test");
+                new BeastXRunner(source).buildModel("test");
 
         BeastXModelSummary summary =
                 BeastXModelSummary.from(model);
@@ -114,7 +114,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source).buildModel("test");
+                new BeastXRunner(source).buildModel("test");
 
         BeastXModelSummary summary =
                 BeastXModelSummary.from(model);
@@ -139,7 +139,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         try {
-            new PhyloSpecRunner(source).buildState("test");
+            new BeastXRunner(source).buildState("test");
         } catch (PhyloSpecRunnerException exception) {
             assertTrue(
                     exception.getMessage().contains("MCMC operator scale factor must be between 0 and 1"),
@@ -162,7 +162,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         try {
-            new PhyloSpecRunner(source).buildState("test");
+            new BeastXRunner(source).buildState("test");
         } catch (PhyloSpecRunnerException exception) {
             assertTrue(
                     exception.getMessage().contains("MCMC operator weight must not be negative"),
@@ -185,7 +185,7 @@ public class BeastXMCMCBuilderTest {
                 """;
 
         try {
-            new PhyloSpecRunner(source).buildState("test");
+            new BeastXRunner(source).buildState("test");
         } catch (PhyloSpecRunnerException exception) {
             assertTrue(
                     exception.getMessage().contains("MCMC operator setting must be positive"),
@@ -205,7 +205,7 @@ public class BeastXMCMCBuilderTest {
                 }
                 """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         assertEquals(1000, state.chainLength);
@@ -221,7 +221,7 @@ public class BeastXMCMCBuilderTest {
                 }
                 """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         assertEquals(1, state.screenLoggerSpecs.size());
@@ -242,7 +242,7 @@ public class BeastXMCMCBuilderTest {
                 }
                 """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         assertEquals(1, state.screenLoggerSpecs.size());
@@ -264,7 +264,7 @@ public class BeastXMCMCBuilderTest {
                 }
                 """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -291,7 +291,7 @@ public class BeastXMCMCBuilderTest {
                 }
                 """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -320,7 +320,7 @@ public class BeastXMCMCBuilderTest {
             }
             """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         assertEquals(1, state.fileLoggerSpecs.size());
@@ -344,7 +344,7 @@ public class BeastXMCMCBuilderTest {
             }
             """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -381,7 +381,7 @@ public class BeastXMCMCBuilderTest {
             }
             """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         assertEquals(1, state.treeLoggerSpecs.size());
@@ -410,7 +410,7 @@ public class BeastXMCMCBuilderTest {
             }
             """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -440,7 +440,7 @@ public class BeastXMCMCBuilderTest {
             }
             """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -473,7 +473,7 @@ public class BeastXMCMCBuilderTest {
         }
         """;
 
-        PhyloSpecRunner runner = new PhyloSpecRunner(source);
+        BeastXRunner runner = new BeastXRunner(source);
         BeastXState state = runner.buildState("test");
 
         List<Logger> loggers =
@@ -498,7 +498,7 @@ public class BeastXMCMCBuilderTest {
             """;
 
         BeastXState state =
-                new PhyloSpecRunner(source).buildState("test");
+                new BeastXRunner(source).buildState("test");
 
         assertEquals(12345L, state.randomSeed);
     }
@@ -512,7 +512,7 @@ public class BeastXMCMCBuilderTest {
             """;
 
         try {
-            new PhyloSpecRunner(source).buildState("test");
+            new BeastXRunner(source).buildState("test");
         } catch (PhyloSpecRunnerException exception) {
             assertTrue(
                     exception.getMessage().contains("MCMC random seed must not be negative"),
@@ -535,7 +535,7 @@ public class BeastXMCMCBuilderTest {
             """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source).buildModel("test");
+                new BeastXRunner(source).buildModel("test");
 
         new MCMCBuilder().build(model);
 
@@ -556,7 +556,7 @@ public class BeastXMCMCBuilderTest {
             """;
 
         BeastXModel model =
-                new PhyloSpecRunner(source).buildModel("test");
+                new BeastXRunner(source).buildModel("test");
 
         List<Logger> loggers =
                 new MCMCBuilder().buildLoggers(model);
@@ -603,7 +603,7 @@ public class BeastXMCMCBuilderTest {
                         .build();
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source).run(options);
+                new BeastXRunner(source).run(options);
 
         Path logPath =
                 outputDirectory.resolve("scalar.log");
@@ -642,7 +642,7 @@ public class BeastXMCMCBuilderTest {
                         .build();
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source).run(options);
+                new BeastXRunner(source).run(options);
 
         Path logPath =
                 outputDirectory.resolve("tree.log");
@@ -681,7 +681,7 @@ public class BeastXMCMCBuilderTest {
                 Path.of("target", "runner-artifacts", "scalar-" + System.nanoTime());
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("scalarArtifactRun")
                                         .mode(RunMode.EXECUTE_MCMC)
@@ -721,7 +721,7 @@ public class BeastXMCMCBuilderTest {
                 Path.of("target", "runner-artifacts", "tree-" + System.nanoTime());
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("treeArtifactRun")
                                         .mode(RunMode.EXECUTE_MCMC)
@@ -776,7 +776,7 @@ public class BeastXMCMCBuilderTest {
             """.formatted(explicitLogPath.toString().replace("\\", "\\\\"));
 
         BeastXRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .run(
                                 RunnerOptions.builder("explicitArtifactRun")
                                         .mode(RunMode.EXECUTE_MCMC)
@@ -900,8 +900,8 @@ public class BeastXMCMCBuilderTest {
     }
 
     private List<MCMCOperator> buildOperators(String source) throws Exception {
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         BeastXModel model =
                 runner.buildModel("test");

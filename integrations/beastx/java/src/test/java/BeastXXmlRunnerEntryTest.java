@@ -46,7 +46,7 @@ public class BeastXXmlRunnerEntryTest {
                 """.formatted(XmlTestSupport.unixPath(logPath));
 
         MCMC mcmc =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .writeAndRunXmlMCMC("runnerEntryPoint", xmlPath);
 
         assertNotNull(mcmc);
@@ -84,7 +84,7 @@ public class BeastXXmlRunnerEntryTest {
                 """.formatted(XmlTestSupport.unixPath(logPath));
 
         XmlRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .executeXmlRun("structuredXmlRun", xmlPath);
 
         assertEquals("structuredXmlRun", result.runName());
@@ -132,7 +132,7 @@ public class BeastXXmlRunnerEntryTest {
                         .build();
 
         XmlRunResult result =
-                new PhyloSpecRunner(source)
+                new BeastXRunner(source)
                         .executeXmlRun(options);
 
         assertEquals("xmlOptionsRun", result.runName());
@@ -153,7 +153,7 @@ public class BeastXXmlRunnerEntryTest {
         XmlTestSupport.prepare(xmlPath);
 
         XmlRunResult result =
-                PhyloSpecRunner.buildXmlRunFromFile(sourcePath, xmlPath);
+                BeastXRunner.buildXmlRunFromFile(sourcePath, xmlPath);
 
         assertEquals("strictClockPhyloCTMCWithMCMC2", result.runName());
         assertEquals(xmlPath, result.xmlPath());
@@ -178,8 +178,8 @@ public class BeastXXmlRunnerEntryTest {
         Files.createDirectories(outputDirectory);
         Files.deleteIfExists(xmlPath);
 
-        PhyloSpecRunner runner =
-                PhyloSpecRunner.fromFile(sourcePath);
+        BeastXRunner runner =
+                BeastXRunner.fromFile(sourcePath);
 
         BeastXRunResult inMemoryRun =
                 runner.buildMaterializedRun("strictClockPhyloCTMCWithMCMC2");
@@ -276,7 +276,7 @@ public class BeastXXmlRunnerEntryTest {
 
         try {
             result =
-                    PhyloSpecRunner.executeDefaultXmlRunFromFile(sourcePath);
+                    BeastXRunner.executeDefaultXmlRunFromFile(sourcePath);
         } catch (RuntimeException exception) {
             Assumptions.assumeFalse(
                     isMissingBeagleLibrary(exception),

@@ -383,8 +383,8 @@ public class BeastXRepresentativeModelsTest {
         String source =
                 readSource(path);
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         return runner.buildModel("test");
     }

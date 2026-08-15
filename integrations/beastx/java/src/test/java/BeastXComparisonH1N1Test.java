@@ -45,7 +45,7 @@ public class BeastXComparisonH1N1Test {
 
         String xml =
                 XmlTestSupport.writeXml(
-                        new PhyloSpecRunner(source)
+                        new BeastXRunner(source)
                                 .buildModel(XML_RUN_NAME),
                         xmlPath
                 );
@@ -105,7 +105,7 @@ public class BeastXComparisonH1N1Test {
 
         try {
             result =
-                    new PhyloSpecRunner(source)
+                    new BeastXRunner(source)
                             .run(
                                     RunnerOptions.builder(RUN_NAME)
                                             .mode(RunMode.EXECUTE_MCMC)

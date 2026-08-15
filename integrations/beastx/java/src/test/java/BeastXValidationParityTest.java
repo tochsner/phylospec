@@ -144,7 +144,7 @@ public class BeastXValidationParityTest {
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class,
-                        () -> new PhyloSpecRunner(source).buildState("validationParity")
+                        () -> new BeastXRunner(source).buildState("validationParity")
                 );
 
         String message =

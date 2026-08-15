@@ -32,8 +32,8 @@ public class BeastXPhyloCTMCMaterializationTest {
         String source =
                 readSource(MODEL_PATH);
 
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         BeastXModel model =
                 runner.buildModel("test");
@@ -91,8 +91,8 @@ public class BeastXPhyloCTMCMaterializationTest {
     }
 
     private BeastXModel assumeMaterializedModelCanBeBuilt(String source) throws Exception {
-        PhyloSpecRunner runner =
-                new PhyloSpecRunner(source);
+        BeastXRunner runner =
+                new BeastXRunner(source);
 
         try {
             return runner.buildMaterializedModel("test");
