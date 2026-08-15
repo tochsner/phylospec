@@ -14,7 +14,7 @@ import java.util.*;
 public class BEASTState {
 
     public final String runName;
-    public long chainLength = 10_00_000;
+    public long chainLength;
 
     private final List<BEASTObject> beastObjects;
     private final Set<BEASTObject> initializedBeastObjects;
@@ -34,10 +34,19 @@ public class BEASTState {
     public final List<beast.base.inference.Logger> treeLoggers;
 
     /**
-     * Creates a new BEAST state with the given run name.
+     * Creates a new BEAST state with the given run name, using the default chain length.
      */
     public BEASTState(String runName) {
+        this(runName, 10_00_000);
+    }
+
+    /**
+     * Creates a new BEAST state with the given run name and default chain length.
+     * A {@code chainLength} assignment in the PhyloSpec script still overrides this value.
+     */
+    public BEASTState(String runName, long chainLength) {
         this.runName = runName;
+        this.chainLength = chainLength;
         this.stateNodes = new HashMap<>();
         this.calculationNodes = new HashMap<>();
         this.priorDistributions = new HashMap<>();

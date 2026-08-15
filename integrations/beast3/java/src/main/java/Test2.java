@@ -11,7 +11,7 @@ public class Test2 {
               Alignment data = fromNexus(file)
         """;
 
-        PhyloSpecRunner parser = new PhyloSpecRunner(source);
+        PhyloSpecRunner<?, ?> parser = new BEASTMCMCRunner(source);
         parser.runPhyloSpec("Test2");
     }
 
