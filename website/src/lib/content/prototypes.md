@@ -45,3 +45,8 @@ PhyloSpec has working prototype tools that are being developed to guide the desi
 ## Runner
 
 **PhyloRun** — Executes PhyloSpec models in RevBayes and BEAST 2 (<a href="https://github.com/tochsner/phylorun/tree/main" target="_blank">Try it out</a>)
+
+
+## PhyloSpec Repository
+
+**Central Repository** — Contains the component libraries and engine extensions used by the tooling. <a href="https://github.com/tochsner/phylospec-repostory" target="_blank">Check it out</a>.

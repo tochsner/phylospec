@@ -48,18 +48,18 @@ A preliminary JSON schema is available. It will be refined throughout the next f
 
 An early draft of standard types, distributions, and functions is available. This will be refined through community discussion and the PhyloSpec working group to establish common components and best practices. <a href="./components">→ View components</a>
 
-**Modeling Language** — 🚧 In Progress
+**Modeling Language** — 🔄 Preliminary
 
 A preliminary language specification is available. The exact syntax will be refined throughout the next few months. <a href="./language">→ Read documentation</a>
 
 **Prototypes** — 🚧 In Progress
 
-Working prototypes include: Parser & Type Checker, LSP & VS Code Extension, Model Converters (to JSON, to Rev, to LPhy), and Runner (Execute PhyloSpec models in RevBayes and BEAST 2). <a href="./prototypes">→ Check out prototypes</a>
+Working prototypes include: Parser & Type Checker, LSP & VS Code Extension, Model Converters (to JSON, to Rev, to LPhy), and Runner (Execute PhyloSpec models in RevBayes, BEAST 2 and BEAST X). <a href="./prototypes">→ Check out prototypes</a>
 
-**Engine Integration Format** — 📝 Planned
+**JSON Engine Integration Format** — 🔄 Preliminary
 
-A standardized format to document engine-specific capabilities and limitations.
+A standardized format to document engine-specific capabilities and limitations is available.
 
-**Inference Engine Integration** — 📝 Planned
+**Inference Engine Integration** — 🚧 In Progress
 
-Direct integration of PhyloSpec into major phylogenetic inference engines (RevBayes, BEAST 2, and others).
+Direct integration of PhyloSpec into major phylogenetic inference engines (BEAST 2 and BEAST X are available, RevBayes is ongoing).
