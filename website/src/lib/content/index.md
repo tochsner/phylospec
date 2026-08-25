@@ -33,9 +33,10 @@ Educators can teach unified workshops using community-built teaching material.
 
 Current members:
 
-- Tobia Ochsner, Tim Vaughan, Tanja Stadler (ETH Zürich)
-- Alexei Drummond, Walter Xie, Remco Bouckaert (University of Auckland)
-- Sebastian Höhna (LMU Munich)
+- Alexei Drummond, Walter Xie, Remco Bouckaert, Haoyuan Huang (University of Auckland)
+- Sebastian Höhna, David Černý (LMU Munich)
+- Joëlle Barido-Sottani (ENS Paris)
+- Guy Baele (KU Leuven)
 
 ## Roadmap & Progress
 
